@@ -1,0 +1,93 @@
+html, body {
+   width: 100%;
+}
+html, body, * {
+   box-sizing: border-box;
+}
+
+body {
+   background: black;
+   margin: 0;
+   padding: 0;
+   margin: 0 auto;
+   padding: 0px 40px 40px 40px;
+}
+
+body * {
+   font-family: sans-serif;
+   font-weight: 100;
+}
+
+.menu {
+   display: flex;
+   height: 100px;
+   align-items: center;
+   justify-content: space-between;
+   width: 600px;
+}
+
+.menu > a  {
+   text-decoration: none;
+}
+
+.social {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+}
+
+.social > a {
+   display: block;
+   
+}
+
+.about {
+   margin-top: 40px;
+}
+
+header {
+   margin-top: 20px;
+   display: flex;
+   flex-direction: column;
+}
+
+body > header,
+body > main {
+   width: 100%;
+}
+
+main {
+   margin-top: 40px;
+}
+
+
+footer {
+   text-align: center;
+}
+main > section, footer {
+   margin-top: 100px; 
+}
+
+a, body {
+   color: white;
+}
+
+.mt-logo {
+   max-width: 60px;
+   padding: 0;
+   margin: 0;
+}
+
+h1.mt-logo > img {
+   width: 100%;
+}
+
+header, main {
+   width: 100%;
+}
+
+
+div.release, div.release > img {
+   width: 50%;
+}
