@@ -124,8 +124,7 @@ header, main {
 
 .release > .visual > a > img {
    width: 100%;
-   max-width: 50vw;
-   padding: 100px;
+   max-width: 640px;
 }
 
 .release > .visual {
@@ -167,7 +166,7 @@ header, main {
 }
 
 
-@media(max-width: 900px) {
+@media(max-width: 1100px) {
    .release {
       display: flex; 
       flex-direction: column;
