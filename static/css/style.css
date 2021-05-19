@@ -10,12 +10,37 @@ body {
    margin: 0;
    padding: 0;
    margin: 0 auto;
-   padding: 0px 40px 40px 40px;
 }
 
 body * {
    font-family: sans-serif;
    font-weight: 100;
+   color: rgba(255,255,255,0.8);
+
+}
+
+header, main {
+   padding-left: 40px;
+   padding-right: 40px;
+}
+
+.color-emphasis {
+   color: rgb(194,115,203);
+}
+
+span.release {
+   display: inline-block;
+   font-style: italic;
+} 
+
+.site {
+   display: flex;
+   min-height: 100vh;
+   flex-direction: column;
+}
+
+.site-content {
+   flex: 1;
 }
 
 .menu {
@@ -23,7 +48,7 @@ body * {
    height: 100px;
    align-items: center;
    justify-content: space-between;
-   width: 600px;
+   width: 300px;
 }
 
 .menu > a  {
@@ -43,11 +68,9 @@ body * {
 }
 
 .about {
-   margin-top: 40px;
 }
 
 header {
-   margin-top: 20px;
    display: flex;
    flex-direction: column;
 }
@@ -58,15 +81,16 @@ body > main {
 }
 
 main {
-   margin-top: 40px;
+   margin-bottom: 100px;
 }
 
 
 footer {
+   padding: 40px;
    text-align: center;
 }
+
 main > section, footer {
-   margin-top: 100px; 
 }
 
 a, body {
@@ -88,6 +112,81 @@ header, main {
 }
 
 
-div.release, div.release > img {
+.release {
+   display: flex;
+   width: 100%;
+}
+
+.release > .visual > a > img {
+   width: 100%;
+   max-width: 50vw;
+   padding: 100px;
+}
+
+.release > .visual {
+   padding-left: 40px;
+}
+.release > .visual {
+   padding-right: 40px;
+}
+.release > .visual,
+.release > .text {
+   display: flex;
+   align-items: center;
+   justify-content: left;
    width: 50%;
+}
+
+.release > .text {
+      padding: 40px 0px 0px 0px;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+}
+
+.release > .text > .release-links {
+   display: flex;
+   margin: 40px;
+}
+
+.release-link > i:hover {
+   color: white;
+}
+.release-link {
+   margin: 0 5px 0 5px;
+   font-size: 3em;
+}
+
+
+@media(max-width: 900px) {
+   .release {
+      display: flex; 
+      flex-direction: column;
+   }
+   .release > .visual,
+   .release > .text {
+      width: 100%;
+   }
+   .release > .text {
+      padding: 40px 0px 0px 0px;
+   }
+   .release > .text > p {
+      align-self: flex-start;
+   }
+
+   .release > .visual {
+      padding: 0px;
+   }
+
+   .release > .visual > a > img {
+      width: 100%;
+      max-width: initial;
+      padding: 0;
+   }
+   header, main {
+      padding-left: 10px;
+      padding-right: 10px;
+   }
+
+
 }

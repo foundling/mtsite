@@ -1,52 +1,51 @@
 <!doctype html>
 <html>
-   <head></head>
+   <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+   </head>
    <head>
       <script src="https://kit.fontawesome.com/beb61ff654.js" crossorigin="anonymous"></script>
       <link rel="stylesheet" href="{{ url_for('static', filename="css/style.css") }}">
    </head>
-   <body>
+   <body class="site">
       <header>
          <section class="menu">
             <a src="{{ url_for('static', filename='img/mt-logo-short-white-on-black.png') }}" href="/">
                <img class="mt-logo" src="{{ url_for('static', filename='img/mt-logo-short-white-on-black.png') }}" />
             </a>
-            <a href="/artists">artists</a>
-            <a href="/latest">latest</a>
-            <a href="/newsletter">newsletter</a>
-            <a href="/about">about</a>
-            <a>|</a>
+            <!--
+            -->
+         </section>
+      </header>
+      <main class="site-content">
+         <section class="news">
+            <div class="release">
+               <div class="text">
+                  <h2>Al's Magic <i class="color-emphasis">Cosmic Takes</i></h2>
+                  <p>Coming <span class="color-emphasis">5.20.2021</span></p>
+                  <p>Machine Tone presents its very first release. <i class="color-emphasis">Cosmic Takes</i> is an ecstatic, ideosyncratic and funked-out love affair with '93 electro. If you like Robert Hood, Drexciya, Dopplereffekt, we think you'll like this.</p>
+                  <p>Music written, recorded and mixed by Alex Ramsdell. Mastered by Dietrich Schoenemann.</p>
+                  <div class="release-links">
+                     <a class="release-link" href="https://machinetonemusic.bandcamp.com"><i class="fab fa-bandcamp"></i></a>
+                     <a class="release-link" href="https://instagram.com/machinetone"><i class="fab fa-instagram"></i></a>
+                  </div>
+               </div>
+               <div class="visual">
+                  <a href="https://machinetonemusic.bandcamp.com">
+                     <img src="{{ url_for('static', filename='img/cosmic-takes.jpeg') }}" />
+                  </a>
+               </div>
+            </div>
+         </section>
+      </main>
+      <footer>
+         <p>© Machine Tone Music, 2021.  All Rights Reserved.</p>
+
             <a href="https://facebook.com/machinetone"><i class="fab fa-facebook-f"></i></a>
             <a href="https://instagram.com/machinetone"><i class="fab fa-instagram"></i></a>
             <a href="https://machinetonemusic.bandcamp.com"><i class="fab fa-bandcamp"></i></a>
             <a href="https://soundcloud.com/machinetonemusic"><i class="fab fa-soundcloud"></i></a>
             <a href="https://twitter.com/machine_tone"><i class="fab fa-twitter"></i></a>
-            <!-- 
-            <a href="/shop">shop</a>
-            <a href="/hardware">hardware</a>
-            <a href="/stream">stream</a>
-            -->
-         </section>
-         <section class="about">
-            MA electronic music label founded by Justin Reed and Alex Ramsdell. We like the old stuff and we like the new stuff. 10% of all record proceeds go to youth leadership organizations across the USA.  
-         </section>
-      </header>
-      <main>
-
-         <section class="social">
-         </section>
-
-         <section class="news">
-            <div class="release">
-               <h2>Al's Magic <i>Cosmic Takes</i></h2>
-               <img src="{{ url_for('static', filename='img/cosmic-takes.jpeg') }}" />
-            </div>
-         </section>
-
-
-      </main>
-      <footer>
-         © Machine Tone Music, 2021.  All Rights Reserved.
       </footer>
    </body>
 <html>
