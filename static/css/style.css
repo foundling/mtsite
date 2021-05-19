@@ -138,7 +138,7 @@ header, main {
 }
 
 .release > .text {
-      padding: 40px 0px 0px 0px;
+   padding: 40px 0px 0px 0px;
    display: flex;
    flex-direction: column;
    justify-content: center;
@@ -168,7 +168,7 @@ header, main {
       width: 100%;
    }
    .release > .text {
-      padding: 40px 0px 0px 0px;
+      padding: 10px 0px 0px 0px;
    }
    .release > .text > p {
       align-self: flex-start;
