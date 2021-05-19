@@ -91,7 +91,7 @@ main {
 
 
 footer {
-   padding: 40px;
+   padding: 20px 10px;
    text-align: center;
 }
 
@@ -150,11 +150,14 @@ header, main {
    display: flex;
    flex-direction: column;
    justify-content: center;
+   align-items: flex-start;
 }
 
 .release > .text > .release-links {
+   margin-top: 1em;
    display: flex;
-   margin: 40px;
+   width: 100%;
+   align-items: center;
 }
 
 .release-link > i:hover {
@@ -190,6 +193,10 @@ header, main {
       width: 100%;
       max-width: initial;
       padding: 0;
+   }
+
+   .release > .text > .release-links {
+      justify-content: center;
    }
    header, main {
       padding-left: 10px;
