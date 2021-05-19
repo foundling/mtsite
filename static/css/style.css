@@ -28,6 +28,11 @@ header, main {
    color: rgb(194,115,203);
 }
 
+h1.announcement {
+   font-size: 3em;
+   text-align: center;
+}
+
 span.release {
    display: inline-block;
    font-style: italic;
@@ -125,10 +130,14 @@ header, main {
 
 .release > .visual {
    padding-left: 40px;
-}
-.release > .visual {
    padding-right: 40px;
+   flex-direction: column;
 }
+
+.visual > h2 {
+   font-size: 3em;
+}
+
 .release > .visual,
 .release > .text {
    display: flex;
@@ -186,6 +195,10 @@ header, main {
    header, main {
       padding-left: 10px;
       padding-right: 10px;
+   }
+
+   main {
+      margin-bottom: 0px;
    }
 
 
