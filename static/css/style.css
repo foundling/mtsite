@@ -22,6 +22,7 @@ body * {
 header, main {
    padding-left: 40px;
    padding-right: 40px;
+   max-width: 100%;
 }
 
 .color-emphasis {
@@ -29,8 +30,8 @@ header, main {
 }
 
 h1.announcement {
-   font-size: 3em;
-   text-align: center;
+  font-size: 3em;
+  text-align: center;
 }
 
 span.release {
@@ -48,16 +49,16 @@ span.release {
    flex: 1;
 }
 
-.menu {
-   display: flex;
-   height: 100px;
-   align-items: center;
-   justify-content: space-between;
-   width: 300px;
-}
 
-.menu > a  {
+header > a  {
    text-decoration: none;
+   justify-content: center;
+   display: flex;
+}
+header > a, 
+header > a > img {
+  width: 80%;
+  height: 80%;
 }
 
 .social {
@@ -72,12 +73,11 @@ span.release {
    
 }
 
-.about {
-}
-
 header {
    display: flex;
-   flex-direction: column;
+   justify-content: center;
+   margin-top: 100px;
+   margin-bottom: 30px;
 }
 
 body > header,
@@ -103,13 +103,9 @@ a, body {
 }
 
 .mt-logo {
-   max-width: 60px;
    padding: 0;
    margin: 0;
-}
 
-h1.mt-logo > img {
-   width: 100%;
 }
 
 header, main {
@@ -160,12 +156,13 @@ header, main {
    align-items: center;
 }
 
-.release-link > i:hover {
-   color: white;
-}
 .release-link {
    margin: 0 5px 0 5px;
    font-size: 3em;
+}
+
+.release-link > i:hover {
+   color: rgba(194, 115, 203, 0.5);
 }
 
 
@@ -198,6 +195,11 @@ header, main {
    .release > .text > .release-links {
       justify-content: center;
    }
+   header > a, 
+   header > a > img {
+     width: 100%;
+     height: 100%;
+   }
    header, main {
       padding-left: 10px;
       padding-right: 10px;
@@ -206,6 +208,5 @@ header, main {
    main {
       margin-bottom: 0px;
    }
-
 
 }
