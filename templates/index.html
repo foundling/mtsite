@@ -1,52 +1,32 @@
-<!doctype html>
-<html>
-   <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Machine Tone Music</title>
-   </head>
-   <head>
-      <script src="https://kit.fontawesome.com/beb61ff654.js" crossorigin="anonymous"></script>
-      <link rel="stylesheet" href="{{ url_for('static', filename="css/style.css") }}">
-   </head>
-   <body class="site">
-      <header>
-          <a src="{{ url_for('static', filename='img/mt-logo-short-white-on-black.png') }}" href="/">
-             <img class="mt-logo" src="{{ url_for('static', filename='img/mt-logo-long-white-on-black-cropped.png') }}" />
-          </a>
-      </header>
-      <main class="site-content">
-         <section class="news">
-            <h1 class="announcement">Coming <span class="color-emphasis">6.1.2021</span> &mdash; Al's Magic <i class="color-emphasis">Cosmic Takes</i></h1>
-            <div class="release">
-               <div class="visual">
-                  <a href="https://machinetonemusic.bandcamp.com">
-                     <img src="{{ url_for('static', filename='img/cosmic-takes-new-cover.jpg') }}" />
-                      
-                  </a>
-               </div>
-               <div class="text">
-                  <p>Machine Tone presents its very first release, Al's Magic <i class="color-emphasis">Cosmic Takes</i>. It's an ecstatic, curious and funked-out love affair with 90's US electro. If you like Robert Hood, Drexciya, Dopplereffekt, we think you'll like this.</p>
-                  <p>Music written, recorded and mixed by Alex Ramsdell. Mastered by Dietrich Schoenemann.</p>
-                  <div class="release-links">
-                     <a class="release-link" href="https://machinetonemusic.bandcamp.com"><i class="fab fa-bandcamp"></i></a>
-                     <a class="release-link" href="https://instagram.com/machinetone"><i class="fab fa-instagram"></i></a>
-                     <a class="release-link" href="https://facebook.com/machinetone"><i class="fab fa-facebook-f"></i></a>
-                     <a class="release-link" href="https://soundcloud.com/machinetonemusic"><i class="fab fa-soundcloud"></i></a>
-                  </div>
-               </div>
-            </div>
-         </section>
-      </main>
+{% extends "layout.html" %}
 
-      <footer>
-         <p>&#169; Machine Tone Music, 2021.  All Rights Reserved.</p>
-         <!--
-         <a href="https://facebook.com/machinetone"><i class="fab fa-facebook-f"></i></a>
-         <a href="https://instagram.com/machinetone"><i class="fab fa-instagram"></i></a>
-         <a href="https://machinetonemusic.bandcamp.com"><i class="fab fa-bandcamp"></i></a>
-         <a href="https://soundcloud.com/machinetonemusic"><i class="fab fa-soundcloud"></i></a>
-         <a href="https://twitter.com/machine_tone"><i class="fab fa-twitter"></i></a>
-         -->
-      </footer>
-   </body>
-<html>
+{% block content %}
+<header>
+  <a src="{{ url_for('static', filename='img/mt-logo-short-white-on-black.png') }}" href="/">
+    <img class="mt-logo" src="{{ url_for('static', filename='img/mt-logo-long-white-on-black-cropped.png') }}" />
+  </a>
+</header>
+<main class="site-content">
+  <section class="news">
+    <h1 class="announcement">Coming <span class="color-emphasis">6.1.2021</span> &mdash; Al's Magic <i class="color-emphasis">Cosmic Takes</i></h1>
+    <div class="release">
+      <div class="visual">
+        <a href="https://machinetonemusic.bandcamp.com">
+          <img src="{{ url_for('static', filename='img/cosmic-takes-new-cover.jpg') }}" />
+        </a>
+      </div>
+      <div class="text">
+
+        <p>Machine Tone presents its very first release, Al's Magic <i class="color-emphasis">Cosmic Takes</i>. It's an ecstatic, curious and funked-out love affair with 90's US electro. If you like Robert Hood, Drexciya, Dopplereffekt, we think you'll like this.</p>
+        <p>Music written, recorded and mixed by Alex Ramsdell. Mastered by Dietrich Schoenemann.</p>
+        <div class="release-links">
+          <a class="release-link" href="https://machinetonemusic.bandcamp.com"><i class="fab fa-bandcamp"></i></a>
+          <a class="release-link" href="https://instagram.com/machinetone"><i class="fab fa-instagram"></i></a>
+          <a class="release-link" href="https://facebook.com/machinetone"><i class="fab fa-facebook-f"></i></a>
+          <a class="release-link" href="https://soundcloud.com/machinetonemusic"><i class="fab fa-soundcloud"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,23 @@
+PRAGMA foreign_keys = ON;
+
+create table if not exists post (
+  id integer primary key autoincrement,
+  author text not null,
+  pub_date date not null,
+  title text not null,
+  content text not null,
+  published bool default false not null
+);
+
+create table if not exists tag (
+  id integer primary key autoincrement,
+  tag text not null
+);
+
+create table if not exists post_tag (
+  id integer primary key autoincrement,
+  post_id integer not null,
+  tag_id integer not null,
+  foreign key(post_id) references post(id),
+  foreign key(tag_id) references tags(id)
+);
