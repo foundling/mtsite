@@ -2,9 +2,11 @@
 
 {% block content %}
   {% for post in posts %}
-  <img></img>
-  <p>{{ post.title }}</p>
-  <p>{{ post.author }}</p>
-  <p>{{ post.pub_date }}</p>
+    {% set tags = post.post_tags.split(',') %} 
+    <img></img>
+    <p>{{ post.title }}</p>
+    <p>{{ post.author }}</p>
+    <p>{{ post.pub_date }}</p>
+    <p>{% for tag in tags %}{{ tag }} {% endfor %}</p>
   {% endfor %}
 {% endblock %}

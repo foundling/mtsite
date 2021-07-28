@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  {{ mde.css() }}
+{% endblock %}
+
+{% block content %}
+  <p>
+    <a href="/admin/post/new">create</a>
+  </p>
+  <div>
+    <p>Edit a post</p>
+    <ul>
+      {% for post in posts %}
+        <li>
+          <form method="POST" action="/admin/post/{{post.id}}/edit">
+            <button type="submit">edit</button>
+          </form>
+          <form method="POST" action="/admin/post/{{ post.id }}/publish">
+            {{ post.title }} (id: {{ post.id }}) | by {{ post.author }} on {{ post.pub_date }} {% if post.tags %}| tags: {{ post.tags }} |{% endif %}
+            {% if post.published %}
+              <button type="submit" name="publish-post" value="publish">publish</button>
+            {% else %}
+              <button type="submit" name="publish-post" value="unpublish">unpublish</button>
+            {% endif %}
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}

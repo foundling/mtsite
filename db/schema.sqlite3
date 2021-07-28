@@ -1,4 +1,6 @@
 PRAGMA foreign_keys = ON;
+.headers on
+.mode column
 
 create table if not exists post (
   id integer primary key autoincrement,
@@ -19,5 +21,37 @@ create table if not exists post_tag (
   post_id integer not null,
   tag_id integer not null,
   foreign key(post_id) references post(id),
-  foreign key(tag_id) references tags(id)
+  foreign key(tag_id) references tag(id),
+  unique(post_id,tag_id)
 );
+
+insert into post (author, pub_date, title, content, published) values ('alex', '2020-03-11', 'test post 1', 'test post content 1', 0);
+insert into post (author, pub_date, title, content, published) values ('alex', '2020-02-04', 'test post 2', 'test post content 2', 0);
+insert into post (author, pub_date, title, content, published) values ('justin', '2020-08-10', 'test post 3', 'test post content 2', 0);
+insert into post (author, pub_date, title, content, published) values ('justin', '2020-01-10', 'test post 4', 'test post content 2', 0);
+
+insert into tag (tag) values ('midi');
+insert into tag (tag) values ('new-music');
+insert into tag (tag) values ('chicago-house');
+insert into tag (tag) values ('electro');
+
+insert into post_tag (post_id, tag_id) values (1, 1);
+insert into post_tag (post_id, tag_id) values (1, 2);
+insert into post_tag (post_id, tag_id) values (1, 3);
+insert into post_tag (post_id, tag_id) values (2, 1);
+insert into post_tag (post_id, tag_id) values (2, 2);
+insert into post_tag (post_id, tag_id) values (2, 3);
+insert into post_tag (post_id, tag_id) values (3, 1);
+insert into post_tag (post_id, tag_id) values (4, 3);
+insert into post_tag (post_id, tag_id) values (4, 1);
+insert into post_tag (post_id, tag_id) values (4, 4);
+
+/*
+select 
+  post.id, post.author, post.title, post.content, post.pub_date, post.published, 
+  group_concat(tag.tag, ",") as post_tags
+from post 
+join post_tag on post.id = post_tag.post_id 
+join tag on tag.id = post_tag.tag_id
+group by post.id;
+*/
