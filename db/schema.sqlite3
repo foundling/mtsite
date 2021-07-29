@@ -13,7 +13,7 @@ create table if not exists post (
 
 create table if not exists tag (
   id integer primary key autoincrement,
-  tag text not null
+  tag text not null unique
 );
 
 create table if not exists post_tag (

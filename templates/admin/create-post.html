@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  {{ mde.css() }}
+{% endblock %}
+
+{% block content %}
+  <form method="POST" action="/admin/post/new">
+    <input name="post-title" value="{{post.title}}"></input>
+    <p>title: <span>{{post.title}}</span></p>
+    <p>published: <span>{{ post.published == '1' }}</span></p>
+    <p>author: <span>{{ post.author}}</span></p>
+    {{ mde.editor(name='post-content', default=post.content) }}
+    <label>tags:
+      <input name="post-tags" value="{{ post.post_tags | join(', ') }}" />
+    </label>
+
+    <button type="submit">create post</button>
+  </form>
+  {{ mde.preview }}
+  {{ mde.js }}
+{% endblock %}

@@ -15,7 +15,6 @@ body {
 body * {
    font-family: sans-serif;
    font-weight: 100;
-   color: rgba(255,255,255,0.8);
 
 }
 
@@ -100,6 +99,10 @@ main > section, footer {
 
 a, body {
    color: white;
+}
+
+textarea, input, #wmd-preview {
+   color: black;
 }
 
 .mt-logo {
