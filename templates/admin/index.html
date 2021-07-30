@@ -1,31 +1,31 @@
-{% extends "layout.html" %}
-
 {% block head %}
-  {{ mde.css() }}
+  {{ mde.css }}
+  <style href="{{ url_for('static', filename='css/admin.css') }}"></style>
 {% endblock %}
 
 {% block content %}
-  <p>
-    <a href="/admin/post/new">create</a>
-  </p>
-  <div>
-    <p>Edit a post</p>
-    <ul>
-      {% for post in posts %}
-        <li>
-          <form method="GET" action="/admin/post/{{post.id}}/edit">
-            <button type="submit">edit</button>
-          </form>
-          <form method="POST" action="/admin/post/{{ post.id }}/publish">
-            {{ post.title }} (id: {{ post.id }}) | by {{ post.author }} on {{ post.pub_date }} {% if post.tags %}| tags: {{ post.tags }} |{% endif %}
-            {% if post.published %}
-              <button type="submit" name="publish-post" value="publish">publish</button>
-            {% else %}
-              <button type="submit" name="publish-post" value="unpublish">unpublish</button>
-            {% endif %}
-          </form>
-        </li>
-      {% endfor %}
-    </ul>
+  <div class="page-admin"
+    <p>
+      <a href="/admin/post/new">create</a>
+    </p>
+    <div>
+      <ul>
+        {% for post in posts %}
+          <li>
+            <form method="GET" action="/admin/post/{{post.id}}/edit">
+              <button type="submit">edit</button>
+            </form>
+            <form method="POST" action="/admin/post/{{ post.id }}/publish">
+              {{ post.title }} (id: {{ post.id }}) | by {{ post.author }} on {{ post.pub_date }} {% if post.tags %}| tags: {{ post.tags }} |{% endif %}
+              {% if post.published %}
+                <button type="submit" name="publish-post" value="publish">unpublish</button>
+              {% else %}
+                <button type="submit" name="publish-post" value="unpublish">publish</button>
+              {% endif %}
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
   </div>
 {% endblock %}

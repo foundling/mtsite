@@ -48,6 +48,7 @@ def get_posts_with_tags():
         for post in posts:
             post['post_tags'] = [ tag for tag in post['post_tags'].split(',') if tag ]
 
+
         return posts
 
 def get_post_with_tags(post_id): 
@@ -64,13 +65,13 @@ def get_post_with_tags(post_id):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('blog/index.html')
 
 @app.route('/news')
 def news():
 
     posts = get_posts_with_tags()
-    return render_template('news.html', posts=posts)
+    return render_template('blog/news.html', posts=posts)
 
 @app.route('/admin')
 def all_posts():
@@ -149,14 +150,14 @@ def edit_post(post_id):
             con.row_factory = sqlite3.Row
             cur = con.cursor()
 
+            cur.execute(UPDATE_POST, (author, pub_date, title, content, published, post_id))
+
             cur.execute(TAGS_FOR_POST_BY_POST_ID, (post_id,))
             old_tags_with_ids = dict(cur.fetchall()) # tag => id
             old_tags = set([tag.lower() for (tag, id) in old_tags_with_ids.items()])
 
             tags_to_delete = old_tags - tags 
             tags_to_add = tags - old_tags
-
-            cur.execute(UPDATE_POST, (author, pub_date, title, content, published, post_id))
 
             for tag in tags_to_delete:
                 # TODO: if we remove a post_tag entry, and there are no posts w/ that tag, need to delete tag from tags table.

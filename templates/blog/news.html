@@ -1,0 +1,11 @@
+{% extends "blog/layout.html" %}
+
+{% block content %}
+  {% for post in posts %}
+    <img></img>
+    <p>title: {{ post.title }}</p>
+    <p>author: {{ post.author }}</p>
+    <p>published on: {{ post.pub_date }}</p>
+    <p>{% for tag in post['post_tags'] %}{{ tag }} {% endfor %}</p>
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,15 @@
+
+.page-editor {
+  background: white;
+  color: black;
+}
+
+.editor {
+  width: 100%;
+  display: flex;
+}
+
+.editor > .pane-editor,
+.editor > .pane-preview {
+  width: 45%;
+}
