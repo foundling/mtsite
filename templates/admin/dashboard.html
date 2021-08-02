@@ -12,11 +12,9 @@
       <ul>
         {% for post in posts %}
           <li>
-            <form method="GET" action="/admin/post/{{post.id}}/edit">
-              <button type="submit">edit</button>
-            </form>
+            <a href="/admin/post/{{post.id}}/edit"><button>edit</button></a>
             <form method="POST" action="/admin/post/{{ post.id }}/publish">
-              {{ post.title }} (id: {{ post.id }}) | by {{ post.author }} on {{ post.pub_date }} {% if post.tags %}| tags: {{ post.tags }} |{% endif %}
+              {{ post.title }} (id: {{ post.id }}) | by {{ post.first_name }} on {{ post.pub_date }} {% if post.tags %}| tags: {{ post.tags }} |{% endif %}
               {% if post.published %}
                 <button type="submit" name="publish-post" value="publish">unpublish</button>
               {% else %}
