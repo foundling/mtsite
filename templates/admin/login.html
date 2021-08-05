@@ -1,29 +1,12 @@
 <form name="login-form" method="POST" action="/admin/login">
+
   {{ form.csrf_token }}
-  <div>
-  {{ form.username.label }} {{ form.username(size=20) }}
 
-  {% if form.username.errors %}
-    {% for error in form.username.errors %}
-      <li>{{ error }}</li>
-    {% endfor %}
-  {% endif %}
-  </div>
+  <div>{% if error %}{{ error }}{% endif %}</div>
+  <div>{{ form.username.label }} {{ form.username(size=20,minlength=4) }}</div>
+  <div>{{ form.password.label }} {{ form.password(size=20, minlength=8, type="password") }}</div>
+  <div>{{ form.remember.label }} {{ form.remember }}</div>
 
-  {{ form.password.label }} {{ form.password(size=20, type="password") }}
+  <input type="submit" value="Register" />
 
-  <div>
-  {% if form.password.errors %}
-    {% for error in form.password.errors %}
-      <li>{{ error }}</li>
-    {% endfor %}
-  {% endif %}
-  </div>
-
-
-  <div>
-  {{ form.remember.label }} {{ form.remember }}
-  </div>
-
-  <input type="submit" value="Login" />
 </form>

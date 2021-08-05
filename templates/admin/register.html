@@ -1,0 +1,12 @@
+<form name="register-form" method="POST" action="/admin/register">
+
+  {{ form.csrf_token }}
+
+  <div>{{ form.email.label }} {{ form.email(size=20) }}</div>
+  <div>{{ form.username.label }} {{ form.username(size=20, minlength=4) }}</div>
+  <div>{{ form.password.label }} {{ form.password(size=20, minlength=8, type="password") }}</div>
+  <div>{{ form.first_name.label }} {{ form.first_name }}</div>
+  <div>{{ form.last_name.label }} {{ form.last_name }}</div>
+
+  <input type="submit" value="Login" />
+</form>

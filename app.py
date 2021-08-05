@@ -1,6 +1,7 @@
 import datetime
 import sqlite3
 from urllib.parse import urlparse, urljoin
+from operator import itemgetter
 import re
 
 from flask import Flask, flash, render_template, redirect, request, url_for
@@ -25,33 +26,72 @@ app.url_map.strict_slashes = False
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
+app.config.update(
+    REMEMBER_COOKIE_HTTPONLY=True,
+    REMEMBER_COOKIE_SECURE=True,
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE='Lax'
+)
 
 pw_hash = bcrypt.generate_password_hash("testpass")
-
 mde = Mde(app)
 
 class User(UserMixin):
-    id = 1
-    username = 'alex'
-    password = 'testpass'
-    email = 'alexramsdell@gmail.com'
 
-class LoginForm(FlaskForm):
-    username = StringField('username', validators=[InputRequired(),Length(min=4, max=15)])
-    password = StringField('password', validators=[InputRequired(),Length(min=8, max=80)])
-    remember = BooleanField('remember me')
+    def __init__(self, id, username, email, password, first_name, last_name):
+        self.id = id
+        self.username = username
+        self.email = email
+        self.password = password
+        self.first_name = first_name
+        self.last_name = last_name
+        self.authenticated = False
 
-class RegisterForm(FlaskForm):
-    email = StringField('email', validators=[InputRequired(), Email(message='Invalid Email'), Length(max=50)])
-    username = StringField('username', validators=[InputRequired(),Length(min=4, max=15)])
-    password = StringField('password', validators=[InputRequired(),Length(min=8, max=80)])
+    def is_active(self):
+        return self.is_active()
+
+    def is_anonymouse(self):
+        return False
+
+    def is_authenticated(self):
+        return self.authenticated
+
+    def is_active(self):
+        return True
+
+    def get_id(self):
+        return self.id
 
 @login_manager.user_loader
 def load_user(user_id):
-        return User()
+    with sqlite3.connect('db/mt.db') as con:
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute('select * from author where id = ?', [user_id])
 
-CREATE_POST = 'insert into post values (NULL, ?, ?, ?, ?, ?)'
-UPDATE_POST = 'update post set author = ?, pub_date = ?, title = ?, content = ?, published = ? where id = ?' 
+        user = cur.fetchone()
+        if user is None:
+            return None
+
+        id, username, email, password, first_name, last_name = itemgetter(
+            'id', 'username', 'email', 'password', 'first_name', 'last_name')(dict(user))
+
+        return User(id, username, email, password, first_name, last_name)
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired(),Length(min=4, max=15)])
+    password = StringField('Password', validators=[InputRequired(),Length(min=8, max=80)])
+    remember = BooleanField('Remember me')
+
+class RegisterForm(FlaskForm):
+    email = StringField('Email', validators=[InputRequired(), Email(message='Invalid Email'), Length(max=50)])
+    username = StringField('Username', validators=[InputRequired(),Length(min=4, max=15)])
+    password = StringField('Password', validators=[InputRequired(),Length(min=8, max=80)])
+    first_name = StringField('First Name', validators=[InputRequired(),Length(min=1, max=100)])
+    last_name = StringField('Last Name', validators=[InputRequired(),Length(min=1, max=100)])
+
+CREATE_POST = 'insert into post (author_id, pub_date, title, content, published) values (NULL, ?, ?, ?, ?, ?)'
+UPDATE_POST = 'update post set pub_date = ?, title = ?, content = ?, published = ? where id = ?' 
 TAGS_FOR_POST_BY_POST_ID = 'select tag.tag, tag.id from tag join post_tag on tag.id = post_tag.tag_id join post on post.id = post_tag.post_id where post_id = ?' 
 CREATE_TAG = 'insert or ignore into tag values (NULL, ?)'
 ADD_TAG_TO_POST = 'insert or ignore into post_tag values (NULL, ?, ?)'
@@ -80,6 +120,7 @@ select
     where post.id = ? 
 '''
 
+CREATE_AUTHOR = 'insert into author (username, email, first_name, last_name, password) values(?, ?, ?, ?, ?)';
 
 def get_posts_with_tags():
 
@@ -99,7 +140,7 @@ def get_post_with_tags(post_id):
     with sqlite3.connect('db/mt.db') as con:
         con.row_factory = sqlite3.Row
         cur = con.cursor()
-        cur.execute(POST_WITH_TAGS_BY_POST_ID, (post_id,))
+        cur.execute(POST_WITH_TAGS_BY_POST_ID, [post_id])
         post = dict(cur.fetchone())
         post['post_tags'] = [ tag for tag in post['post_tags'].split(',') if tag ]
 
@@ -107,46 +148,59 @@ def get_post_with_tags(post_id):
 
 @app.route('/')
 def index():
-
     return render_template('blog/index.html')
 
 @app.route('/news')
 def news():
-
     posts = get_posts_with_tags()
     return render_template('blog/news.html', posts=posts)
 
 @app.route('/admin/dashboard')
 @login_required
 def dashboard():
-
     posts = get_posts_with_tags()
     return render_template('admin/dashboard.html', posts=posts)
+
+@app.route('/admin')
+def admin():
+    return redirect('admin/dashboard')
 
 @app.route('/admin/login', methods=['GET','POST'])
 def login():
 
     form = LoginForm()
+    error = None 
+
     if form.validate_on_submit():
-        if form.username.data != User().username:
-            return 'bad username'
 
-        if bcrypt.check_password_hash(pw_hash, form.password.data):
-            login_user(User(), remember=form.remember.data)
-            flash('user has been logged in successfully!')
+        with sqlite3.connect('db/mt.db') as con:
 
+            con.row_factory = sqlite3.Row
+            cur = con.cursor()
+            cur.execute("select * from author where username = ?", [form.username.data])
+            result = cur.fetchone()
 
-            next = request.args.get('next')
+            if result is None:
+                return render_template('admin/login.html', form=form, error='Invalid user/password combination')
+
+            user = load_user(result['id'])
+
+            if bcrypt.check_password_hash(user.password, form.password.data):
+                login_user(user, remember=form.remember.data)
+                flash('user has been logged in successfully!')
+            else:
+                return render_template('admin/login.html', form=form, error='invalid user/password combination')
+
             # is_safe_url should check if the url is safe for redirects.
             # See http://flask.pocoo.org/snippets/62/ for an example.
+            next = request.args.get('next')
             if not is_safe_url(next):
                 return flask.abort(400)
 
             return redirect(url_for('dashboard'))
-        else:
-            return 'bad password'
 
-    return render_template('admin/login.html', form=form)
+    else:
+        return render_template('admin/login.html', form=form)
 
 @login_required
 @app.route('/admin/logout')
@@ -156,14 +210,11 @@ def logout():
 
 @app.route('/admin/register', methods=['GET','POST'])
 def register():
-
     if request.method == 'GET':
         form = RegisterForm()
         return render_template('admin/login.html', form=form)
-
     elif request.method == 'POST':
         return render_template('admin/login.html')
-
 
 @app.route('/admin/post/new', methods=['GET','POST'])
 @login_required
@@ -201,10 +252,10 @@ def new_post():
             # admits good data, prevents bad data w/out erros
             for tag in tags:
 
-                cur.execute("insert or ignore into tag values (NULL, ?)", (tag,))
+                cur.execute("insert or ignore into tag values (NULL, ?)", [tag])
 
                 # tag is in db at this point, get its id
-                cur.execute("select id from tag where tag = ?", (tag,))
+                cur.execute("select id from tag where tag = ?", [tag])
                 new_tag = cur.fetchone()
                 cur.execute("insert or ignore into post_tag values (NULL, ?, ?)", (post_id, new_tag['id']))
 
@@ -223,7 +274,7 @@ def edit_post(post_id):
 
     if request.method == 'POST':
 
-        author = 'alex'
+        author_id = 1 
         pub_date = datetime.datetime.now()
         content = request.form.get('post-content')
         title = request.form.get('post-title')
@@ -237,9 +288,9 @@ def edit_post(post_id):
             con.row_factory = sqlite3.Row
             cur = con.cursor()
 
-            cur.execute(UPDATE_POST, (author, pub_date, title, content, published, post_id))
+            cur.execute(UPDATE_POST, (pub_date, title, content, published, post_id))
 
-            cur.execute(TAGS_FOR_POST_BY_POST_ID, (post_id,))
+            cur.execute(TAGS_FOR_POST_BY_POST_ID, [post_id])
             old_tags_with_ids = dict(cur.fetchall()) # tag => id
             old_tags = set([tag.lower() for (tag, id) in old_tags_with_ids.items()])
 
@@ -253,10 +304,10 @@ def edit_post(post_id):
 
             for tag in tags_to_add:
 
-                cur.execute(CREATE_TAG, (tag,))
+                cur.execute(CREATE_TAG, [tag])
 
                 # tag is in db at this point, get its id
-                cur.execute("select id from tag where tag = ?", (tag,))
+                cur.execute("select id from tag where tag = ?", [tag])
                 new_tag = cur.fetchone()
                 cur.execute(ADD_TAG_TO_POST, (post_id, new_tag['id']))
 
@@ -270,7 +321,7 @@ def publish_post(post_id):
     
     with sqlite3.connect('db/mt.db') as con:
         cur = con.cursor()
-        cur.execute('update posts set published = 1 where id = ?', (post_id,))
+        cur.execute('update posts set published = 1 where id = ?', [post_id])
         con.commit()
 
     return redirect('/admin')
