@@ -1,43 +1,52 @@
 .page-admin {
-  font-family: sans-serif; }
+  font-family: sans-serif;
+}
 
 .page-editor {
-  background: black; }
+  background: black;
+}
 
 .user-notification {
   position: static;
   top: 0;
   left: 0;
-  background: lightgreen;
-  transition: background 1s ease-out; }
+  background: lightgreen; 
+  transition: background 1s ease-out;
+}
 
 .page-editor {
   background: white;
-  color: black; }
+  color: black;
+}
 
 .editor {
   width: 100%;
-  display: flex; }
+  display: flex;
+}
 
 .editor > .pane-editor,
 .editor > .pane-preview {
-  width: 45%; }
+  width: 45%;
+}
 
 input {
-  border: 0; }
-
+  border: 0;
+}
 input[name=username],
 input[name=password] {
-  border-bottom: 1px solid black; }
+  border-bottom: 1px solid black;
+}
 
 input:not[type=submit] {
-  border: 0; }
+  border: 0;
+}
 
-input[value=Login] {
-  padding: 5px; }
-
+input[value=Login]{
+  padding: 5px;
+}
 input[value=Login]:hover {
   background: lightgreen;
-  cursor: pointer; }
+  cursor: pointer;
+}
 
-/*# sourceMappingURL=admin.css.map */
+

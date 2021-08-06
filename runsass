@@ -1,0 +1,20 @@
+echo '[info] running in dev mode (sass server is running)'
+
+if ! ps aux | grep sass | grep -v 'grep sass'; then
+  /usr/local/bin/sass --watch ./static/css/blog.scss:./static/css/blog.css ./static/css/admin.scss:./static/css/admin.css &
+  SASS_PID=$!
+  echo "[info] starting sass server. PID is: $SASS_PID"
+else
+  echo '[info] sass is already running'
+fi
+
+
+function kill_sass {
+  if [ ! -z $SASS_PID ]; then
+    echo "[info] killing sass server with PID: $SASS_PID ... "
+    kill -9 $SASS_PID
+  else
+    echo "nothing to clean up, sass not running"
+  fi
+
+}

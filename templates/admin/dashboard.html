@@ -1,7 +1,4 @@
-{% block head %}
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin.css') }}"></link>
-  {{ mde.css }}
-{% endblock %}
+{% extends "admin/layout.html" %}
 
 {% block messages %}
   <div class="user-notification">
@@ -17,7 +14,7 @@
     <script>
 
       setTimeout(() => {
-        document.querySelector('.user-notification').remove()
+        //document.querySelector('.user-notification').toggleClass('.user-notification-hidden');
       }, 3000);
 
     </script>
