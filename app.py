@@ -91,11 +91,11 @@ class RegisterForm(FlaskForm):
     first_name = StringField('First Name', validators=[InputRequired(),Length(min=1, max=100)])
     last_name = StringField('Last Name', validators=[InputRequired(),Length(min=1, max=100)])
 
-CREATE_POST = 'insert into post (author_id, pub_date, title, content, published) values (NULL, ?, ?, ?, ?, ?)'
+CREATE_POST = 'insert into post (author_id, pub_date, title, content, published) values (?, ?, ?, ?, ?)'
 UPDATE_POST = 'update post set pub_date = ?, title = ?, content = ?, published = ? where id = ?' 
 TAGS_FOR_POST_BY_POST_ID = 'select tag.tag, tag.id from tag join post_tag on tag.id = post_tag.tag_id join post on post.id = post_tag.post_id where post_id = ?' 
-CREATE_TAG = 'insert or ignore into tag values (NULL, ?)'
-ADD_TAG_TO_POST = 'insert or ignore into post_tag values (NULL, ?, ?)'
+CREATE_TAG = 'insert or ignore into tag (tag) values (?)'
+ADD_TAG_TO_POST = 'insert or ignore into post_tag (post_id, tag_id) values (?, ?)'
 DELETE_TAG_FROM_POST = 'delete from post_tag where post_tag.post_id = ? and post_tag.tag_id = ?'
 ALL_POSTS_WITH_TAGS = '''
     select
@@ -104,7 +104,7 @@ ALL_POSTS_WITH_TAGS = '''
         from post
         join post_tag on post.id = post_tag.post_id
         join tag on tag.id = post_tag.tag_id
-        join post_author on post.id = post_author.post_id
+        join post_author on post.author_id = post_author.author_id
         join author on post_author.author_id = author.id
         group by post.id;
     '''
@@ -170,7 +170,6 @@ def admin():
 def login():
 
     form = LoginForm()
-    error = None 
 
     if form.validate_on_submit():
 
@@ -182,14 +181,16 @@ def login():
             result = cur.fetchone()
 
             if result is None:
-                return render_template('admin/login.html', form=form, error='Invalid user/password combination')
+                error = 'Invalid user/password combination'
+                return render_template('admin/login.html', form=form, error=error)
 
             user = load_user(result['id'])
 
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
             else:
-                return render_template('admin/login.html', form=form, error='invalid user/password combination')
+                error = 'invalid user/password combination'
+                return render_template('admin/login.html', form=form, error=error)
 
             # is_safe_url should check if the url is safe for redirects.
             # See http://flask.pocoo.org/snippets/62/ for an example.
@@ -206,20 +207,25 @@ def login():
 @login_required
 @app.route('/admin/logout')
 def logout():
+
     logout_user()
     return redirect(url_for('login'))
 
 @app.route('/admin/register', methods=['GET','POST'])
 def register():
+
     if request.method == 'GET':
         form = RegisterForm()
         return render_template('admin/login.html', form=form)
+
     elif request.method == 'POST':
         return render_template('admin/login.html')
 
 @app.route('/admin/post/new', methods=['GET','POST'])
 @login_required
 def new_post():
+
+    author_id = current_user.id
 
     if request.method == 'GET':
 
@@ -228,6 +234,7 @@ def new_post():
             'content': 'abc', 
             'title': 'The ABC Are Really Cool' 
         }
+
         return render_template('admin/create-post.html', post=post)
 
     elif request.method == 'POST':
@@ -245,24 +252,28 @@ def new_post():
             con.row_factory = sqlite3.Row
             cur = con.cursor()
 
-            # create post
-            cur.execute(CREATE_POST, (author, pub_date, title, content, published))
+            cur.execute(CREATE_POST, [author_id, pub_date, title, content, published])
             post_id = cur.lastrowid
+            con.commit()
 
             # add tags to post, ensure no errors on duplicates with 'or ignore' clause
             # admits good data, prevents bad data w/out erros
             for tag in tags:
 
-                cur.execute("insert or ignore into tag values (NULL, ?)", [tag])
+                cur.execute(CREATE_TAG, [tag])
 
                 # tag is in db at this point, get its id
                 cur.execute("select id from tag where tag = ?", [tag])
                 new_tag = cur.fetchone()
-                cur.execute("insert or ignore into post_tag values (NULL, ?, ?)", (post_id, new_tag['id']))
+                cur.execute(ADD_TAG_TO_POST, [post_id, new_tag['id']])
 
             con.commit()
 
-            return redirect('/admin')
+            cur.execute(ALL_POSTS_WITH_TAGS)
+            posts = [post for post in cur.fetchall()]
+            print(len(posts), 'new posts: ')
+
+            return redirect('/admin/dashboard')
 
 @app.route('/admin/post/<int:post_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -292,6 +303,8 @@ def edit_post(post_id):
             cur.execute(UPDATE_POST, (pub_date, title, content, published, post_id))
 
             cur.execute(TAGS_FOR_POST_BY_POST_ID, [post_id])
+            con.commit()
+
             old_tags_with_ids = dict(cur.fetchall()) # tag => id
             old_tags = set([tag.lower() for (tag, id) in old_tags_with_ids.items()])
 
@@ -302,6 +315,8 @@ def edit_post(post_id):
                 # TODO: if we remove a post_tag entry, and there are no posts w/ that tag, need to delete tag from tags table.
                 # seems like a trigger is necessary?
                 cur.execute(DELETE_TAG_FROM_POST, (post_id, old_tags_with_ids[tag]))
+
+            con.commit()
 
             for tag in tags_to_add:
 
@@ -322,13 +337,14 @@ def publish_post(post_id):
     
     with sqlite3.connect('db/mt.db') as con:
         cur = con.cursor()
-        cur.execute('update posts set published = 1 where id = ?', [post_id])
+        cur.execute('update post set published = 1 where id = ?', [post_id])
         con.commit()
 
     return redirect('/admin')
 
 @app.errorhandler(404)
 def page_not_found(error):
+
     return render_template('page_not_found.html'), 404
 
 if __name__ == '__main__':

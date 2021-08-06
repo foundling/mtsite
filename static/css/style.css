@@ -214,3 +214,6 @@ header, main {
 
 }
 
+a > button {
+  border: 0 !important;
+}

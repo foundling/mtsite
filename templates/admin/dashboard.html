@@ -1,6 +1,6 @@
 {% block head %}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin.css') }}"></link>
   {{ mde.css }}
-  <style href="{{ url_for('static', filename='css/admin.css') }}"></style>
 {% endblock %}
 
 {% block messages %}
@@ -14,24 +14,31 @@
         </ul>
       {% endif %}
     {% endwith %}
+    <script>
+
+      setTimeout(() => {
+        document.querySelector('.user-notification').remove()
+      }, 3000);
+
+    </script>
   </div>
 {% endblock %}
 
 {% block content %}
-  <div class="page-admin"
-    <a href="/admin/post/new">create</a>
+  <a href="/admin/post/new"><button>create new post</button></a>
+  <div class="page-admin">
     <div>
       <ul>
         {% for post in posts %}
           <li>
-            <a href="/admin/post/{{post.id}}/edit"><button>edit</button></a>
             <form method="POST" action="/admin/post/{{ post.id }}/publish">
               {{ post.title }} (id: {{ post.id }}) | by {{ post.first_name }} on {{ post.pub_date }} {% if post.tags %}| tags: {{ post.tags }} |{% endif %}
               {% if post.published %}
                 <button type="submit" name="publish-post" value="publish">unpublish</button>
               {% else %}
-                <button type="submit" name="publish-post" value="unpublish">publish</button>
+              <button type="submit" name="publish-post" value="unpublish">publish</button>
               {% endif %}
+              <a href="/admin/post/{{post.id}}/edit">edit</a>
             </form>
           </li>
         {% endfor %}

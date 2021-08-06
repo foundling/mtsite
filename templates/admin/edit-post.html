@@ -3,5 +3,5 @@
 {% from "admin/macros/editor.html" import editor with context %}
 
 {% block content %}
-  {{ editor(method='POST', action="/admin/post/{}/edit".format(post.id), post=post, mode="edit") }}
+  {{ editor(method='POST', action="/admin/post/{}/edit".format(post.id), post=post, mode="update") }}
 {% endblock %}
