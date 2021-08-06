@@ -98,27 +98,22 @@ CREATE_TAG = 'insert or ignore into tag (tag) values (?)'
 ADD_TAG_TO_POST = 'insert or ignore into post_tag (post_id, tag_id) values (?, ?)'
 DELETE_TAG_FROM_POST = 'delete from post_tag where post_tag.post_id = ? and post_tag.tag_id = ?'
 ALL_POSTS_WITH_TAGS = '''
-    select
-      author.first_name, post.id, post.title, post.content, post.pub_date, post.published,
-        group_concat(tag.tag, ",") as post_tags
-        from post
-        join post_tag on post.id = post_tag.post_id
-        join tag on tag.id = post_tag.tag_id
-        join post_author on post.author_id = post_author.author_id
-        join author on post_author.author_id = author.id
-        group by post.id;
-    '''
+select
+    author.first_name, post.id, post.title, post.content, post.pub_date, post.published, group_concat(tag.tag, ",") as post_tags
+    from post
+    join author on post.author_id = author.id
+    LEFT join post_tag on post.id = post_tag.post_id
+    LEFT join tag on post_tag.tag_id = tag.id
+    group by post.id;
+'''
 POST_WITH_TAGS_BY_POST_ID = '''
 select
-  author.first_name as author_first_name,
-  post.id, post.title, post.content, post.pub_date, post.published,
-  group_concat(tag.tag, ",") as post_tags
+    author.first_name, post.id, post.title, post.content, post.pub_date, post.published, group_concat(tag.tag, ",") as post_tags
     from post
-    join post_tag on post.id = post_tag.post_id
-    join tag on tag.id = post_tag.tag_id
-    join post_author on post.id = post_author.post_id
-    join author on post_author.author_id = author.id
-    where post.id = ? 
+    join author on post.author_id = author.id
+    LEFT join post_tag on post.id = post_tag.post_id
+    LEFT join tag on post_tag.tag_id = tag.id
+    where post.id = ?;
 '''
 
 CREATE_AUTHOR = 'insert into author (username, email, first_name, last_name, password) values(?, ?, ?, ?, ?)';
@@ -132,7 +127,10 @@ def get_posts_with_tags():
         posts = [ dict(row) for row in cur.fetchall() ]
 
         for post in posts:
-            post['post_tags'] = [ tag for tag in post['post_tags'].split(',') if tag ]
+            if post['post_tags'] is None:
+                post['post_tags'] = []
+            else:
+                post['post_tags'] = [ tag for tag in post['post_tags'].split(',') if tag ]
 
         return posts
 
@@ -143,7 +141,11 @@ def get_post_with_tags(post_id):
         cur = con.cursor()
         cur.execute(POST_WITH_TAGS_BY_POST_ID, [post_id])
         post = dict(cur.fetchone())
-        post['post_tags'] = [ tag for tag in post['post_tags'].split(',') if tag ]
+
+        if post['post_tags'] is None:
+            post['post_tags'] = []
+        else:
+            post['post_tags'] = [ tag for tag in post['post_tags'].split(',') if tag ]
 
         return post
 
@@ -225,14 +227,13 @@ def register():
 @login_required
 def new_post():
 
-    author_id = current_user.id
 
     if request.method == 'GET':
 
         # design problem: another place to update when adding/ removing default values
         post = { 
-            'content': 'abc', 
-            'title': 'The ABC Are Really Cool' 
+            'content': '', 
+            'title': '' 
         }
 
         return render_template('admin/create-post.html', post=post)
@@ -252,6 +253,7 @@ def new_post():
             con.row_factory = sqlite3.Row
             cur = con.cursor()
 
+            author_id = current_user.id
             cur.execute(CREATE_POST, [author_id, pub_date, title, content, published])
             post_id = cur.lastrowid
             con.commit()
@@ -271,7 +273,6 @@ def new_post():
 
             cur.execute(ALL_POSTS_WITH_TAGS)
             posts = [post for post in cur.fetchall()]
-            print(len(posts), 'new posts: ')
 
             return redirect('/admin/dashboard')
 
@@ -294,6 +295,7 @@ def edit_post(post_id):
         tags = set([ tag.lower() for tag 
                  in re.split(r"[\s,]", request.form.get('post-tags', ''))
                  if len(tag) ])
+        print('tags: ', tags)
 
         with sqlite3.connect('db/mt.db') as con:
 

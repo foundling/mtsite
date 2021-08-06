@@ -53,6 +53,7 @@ insert into author
 values 
   ("jreed", "justin.reed@gmail.com", "Justin", "Reed", "$2b$12$iYA/GyJ9l5c3w80cS0fkIOsCaWzlpTKJacmhnfCASIEbIbZ2zvPu.");
 
+/*
 insert into post (pub_date, author_id, title, content, published) values ('2020-03-11', 1, 'test post 1', 'test post content 1', 0);
 insert into post (pub_date, author_id, title, content, published) values ('2020-02-04', 1, 'test post 2', 'test post content 2', 0);
 insert into post (pub_date, author_id, title, content, published) values ('2020-08-10', 2, 'test post 3', 'test post content 2', 0);
@@ -79,7 +80,6 @@ insert into post_author (post_id, author_id) values(3, 1);
 insert into post_author (post_id, author_id) values(2, 2);
 insert into post_author (post_id, author_id) values(4, 2);
 
-/*
 select 
   post.id, post.author, post.title, post.content, post.pub_date, post.published, 
   group_concat(tag.tag, ",") as post_tags
