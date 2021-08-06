@@ -3,11 +3,23 @@
   <style href="{{ url_for('static', filename='css/admin.css') }}"></style>
 {% endblock %}
 
+{% block messages %}
+  <div class="user-notification">
+    {% with messages = get_flashed_messages(category_filter=['info']) %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+  </div>
+{% endblock %}
+
 {% block content %}
   <div class="page-admin"
-    <p>
-      <a href="/admin/post/new">create</a>
-    </p>
+    <a href="/admin/post/new">create</a>
     <div>
       <ul>
         {% for post in posts %}

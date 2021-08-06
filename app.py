@@ -1,10 +1,11 @@
 import datetime
 import sqlite3
+import os
 from urllib.parse import urlparse, urljoin
 from operator import itemgetter
 import re
 
-from flask import Flask, flash, render_template, redirect, request, url_for
+from flask import Flask, flash, get_flashed_messages, render_template, redirect, request, url_for
 from flask_bcrypt import Bcrypt
 from flask_mde import Mde, MdeField
 from flask_wtf import FlaskForm
@@ -20,7 +21,7 @@ def is_safe_url(target):
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
-app.config['SECRET_KEY'] = 'SECRET'
+app.config['SECRET_KEY'] = os.urandom(16)
 app.url_map.strict_slashes = False
 
 login_manager = LoginManager()
@@ -187,7 +188,6 @@ def login():
 
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
-                flash('user has been logged in successfully!')
             else:
                 return render_template('admin/login.html', form=form, error='invalid user/password combination')
 
@@ -197,6 +197,7 @@ def login():
             if not is_safe_url(next):
                 return flask.abort(400)
 
+            flash('You have been logged in successfully!', 'info')
             return redirect(url_for('dashboard'))
 
     else:
