@@ -41,12 +41,11 @@ mde = Mde(app)
 
 class User(UserMixin):
 
-    def __init__(self, id, username, email, password, first_name, last_name):
+    def __init__(self, id, username, password, first_name, last_name):
 
         self.otp_secret = base64.b32encode(os.urandom(10)).decode('utf-8')
         self.id = id
         self.username = username
-        self.email = email
         self.password = password
         self.first_name = first_name
         self.last_name = last_name
@@ -73,19 +72,19 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    with sqlite3.connect('db/mt.db') as con:
+    with sqlite3.connect('db/mt.db', detect_types=sqlite3.PARSE_DECLTYPES) as con:
         con.row_factory = sqlite3.Row
         cur = con.cursor()
-        cur.execute('select * from author where id = ?', [user_id])
+        cur.execute('select * from user join author on user.id = author.author_id where author_id = ?', [user_id])
 
         user = cur.fetchone()
         if user is None:
             return None
 
-        id, username, email, password, first_name, last_name = itemgetter(
-            'id', 'username', 'email', 'password', 'first_name', 'last_name')(dict(user))
+        id, username, password, first_name, last_name = itemgetter(
+            'id', 'username', 'password', 'first_name', 'last_name')(dict(user))
 
-        return User(id, username, email, password, first_name, last_name)
+        return User(id, username, password, first_name, last_name)
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(),Length(min=4, max=15)])
@@ -93,7 +92,6 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember me')
 
 class RegisterForm(FlaskForm):
-    email = StringField('Email', validators=[InputRequired(), Email(message='Invalid Email'), Length(max=50)])
     username = StringField('Username', validators=[InputRequired(),Length(min=4, max=15)])
     password = StringField('Password', validators=[InputRequired(),Length(min=8, max=80)])
     first_name = StringField('First Name', validators=[InputRequired(),Length(min=1, max=100)])
@@ -107,9 +105,9 @@ ADD_TAG_TO_POST = 'insert or ignore into post_tag (post_id, tag_id) values (?, ?
 DELETE_TAG_FROM_POST = 'delete from post_tag where post_tag.post_id = ? and post_tag.tag_id = ?'
 ALL_POSTS_WITH_TAGS = '''
 select
-    author.first_name as author_first_name, author.id as author_id, post.id, post.title, post.content, post.pub_date, post.published, group_concat(tag.tag, ",") as post_tags
+    author.first_name, author.author_id, post.id, post.title, post.content, post.pub_date, post.published, group_concat(tag.tag, ",") as post_tags
     from post
-    join author on post.author_id = author.id
+    join author on post.author_id = author.author_id
     LEFT join post_tag on post.id = post_tag.post_id
     LEFT join tag on post_tag.tag_id = tag.id
     group by post.id;
@@ -117,21 +115,19 @@ select
 POST_WITH_TAGS_BY_POST_ID = '''
 select
 
-    author.first_name as author_first_name, author.id as author_id,
+    author.first_name, author.author_id,
     post.id, post.title, post.content, post.pub_date, post.published, group_concat(tag.tag, ",") as post_tags
 
     from post
-    join author on post.author_id = author.id
+    join author on post.author_id = author.author_id
     LEFT join post_tag on post.id = post_tag.post_id
     LEFT join tag on post_tag.tag_id = tag.id
     where post.id = ?;
 '''
 
-CREATE_AUTHOR = 'insert into author (username, email, first_name, last_name, password) values(?, ?, ?, ?, ?)';
-
 def get_posts_with_tags():
 
-    with sqlite3.connect('db/mt.db') as con:
+    with sqlite3.connect('db/mt.db', detect_types=sqlite3.PARSE_DECLTYPES) as con:
         con.row_factory = sqlite3.Row
         cur = con.cursor()
         cur.execute(ALL_POSTS_WITH_TAGS)
@@ -147,7 +143,7 @@ def get_posts_with_tags():
 
 def get_post_with_tags(post_id): 
 
-    with sqlite3.connect('db/mt.db') as con:
+    with sqlite3.connect('db/mt.db', detect_types=sqlite3.PARSE_DECLTYPES) as con:
         con.row_factory = sqlite3.Row
         cur = con.cursor()
         cur.execute(POST_WITH_TAGS_BY_POST_ID, [post_id])
@@ -177,11 +173,16 @@ def dashboard():
         in get_posts_with_tags()
         if post['author_id'] == current_user.get_id()
     ]
+    print(posts_for_logged_in_author[0])
     return render_template('admin/dashboard.html', posts=posts_for_logged_in_author)
 
 @app.route('/admin')
 def admin():
     return redirect(url_for('dashboard'))
+
+@app.route('/admin/activate')
+def activate():
+    return 'activate'
 
 @app.route('/admin/qrcode', methods=['GET'])
 def qrcode():
@@ -199,11 +200,11 @@ def login():
 
     if form.validate_on_submit():
 
-        with sqlite3.connect('db/mt.db') as con:
+        with sqlite3.connect('db/mt.db', detect_types=sqlite3.PARSE_DECLTYPES) as con:
 
             con.row_factory = sqlite3.Row
             cur = con.cursor()
-            cur.execute("select * from author where username = ?", [form.username.data])
+            cur.execute("select * from author join user on author.author_id = user.id where username = ?", [form.username.data])
             result = cur.fetchone()
 
             if result is None:
@@ -212,8 +213,9 @@ def login():
 
             user = load_user(result['id'])
 
+            # make sure user has done twofactor
             # TODO: create a new user db table, 
-            cur.execute('select * from user', [user.id])
+            # cur.execute('select * from user', [user.id])
 
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
@@ -260,14 +262,14 @@ def new_post():
         # design problem: another place to update when adding/ removing default values
         post = { 
             'content': '', 
-            'title': '' 
+            'title': ''
         }
 
         return render_template('admin/create-post.html', post=post)
 
     elif request.method == 'POST':
 
-        pub_date = datetime.datetime.now()
+        pub_date = datetime.datetime.now().strftime('%Y-%m-%d')
         content = request.form.get('post-content')
         title = request.form.get('post-title')
         published = 0
@@ -275,7 +277,7 @@ def new_post():
                  in re.split(r"[\s,]", request.form.get('post-tags', ''))
                  if len(tag) ]
 
-        with sqlite3.connect('db/mt.db') as con:
+        with sqlite3.connect('db/mt.db', detect_types=sqlite3.PARSE_DECLTYPES) as con:
 
             con.row_factory = sqlite3.Row
             cur = con.cursor()
@@ -315,7 +317,8 @@ def edit_post(post_id):
     if request.method == 'POST':
 
         author_id = 1 
-        pub_date = datetime.datetime.now()
+        pub_date = datetime.datetime.now().strftime('%Y-%m-%d')
+        print(pub_date)
         content = request.form.get('post-content')
         title = request.form.get('post-title')
         published = 0
@@ -323,7 +326,7 @@ def edit_post(post_id):
                  in re.split(r"[\s,]", request.form.get('post-tags', ''))
                  if len(tag) ])
 
-        with sqlite3.connect('db/mt.db') as con:
+        with sqlite3.connect('db/mt.db', detect_types=sqlite3.PARSE_DECLTYPES) as con:
 
             con.row_factory = sqlite3.Row
             cur = con.cursor()
@@ -363,7 +366,7 @@ def edit_post(post_id):
 @app.route('/admin/post/<int:post_id>/publish', methods=['POST'])
 def publish_post(post_id):
     
-    with sqlite3.connect('db/mt.db') as con:
+    with sqlite3.connect('db/mt.db', detect_types=sqlite3.PARSE_DECLTYPES) as con:
         cur = con.cursor()
         cur.execute('update post set published = 1 where id = ?', [post_id])
         con.commit()
