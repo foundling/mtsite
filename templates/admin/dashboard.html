@@ -29,13 +29,17 @@
         {% for post in posts %}
           <li>
             <form method="POST" action="/admin/post/{{ post.id }}/publish">
-              {{ post.title }} (id: {{ post.id }}) | by {{ post.first_name }} on {{ post.pub_date }} {% if post.tags %}| tags: {{ post.tags }} |{% endif %}
+              {{ post.title }} | by <span class="author-name">{{ post.author_first_name }}</span> on {{ post.pub_date }}
+              {% if post.tags %}| tags: {{ post.tags }} |{% endif %}
+
               {% if post.published %}
                 <button type="submit" name="publish-post" value="publish">unpublish</button>
               {% else %}
+
               <button type="submit" name="publish-post" value="unpublish">publish</button>
               {% endif %}
               <a href="/admin/post/{{post.id}}/edit">edit</a>
+
             </form>
           </li>
         {% endfor %}

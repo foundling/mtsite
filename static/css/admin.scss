@@ -7,10 +7,15 @@
 }
 
 .user-notification {
+   .info {
+      background: lightgreen; 
+   }
+   .error {
+      background: red;
+   }
   position: static;
   top: 0;
   left: 0;
-  background: lightgreen; 
   transition: background 1s ease-out;
 }
 

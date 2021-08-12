@@ -1,8 +1,10 @@
 import datetime
 import sqlite3
+import base64
 import os
 from urllib.parse import urlparse, urljoin
 from operator import itemgetter
+import onetimepass
 import re
 
 from flask import Flask, flash, get_flashed_messages, render_template, redirect, request, url_for
@@ -40,6 +42,8 @@ mde = Mde(app)
 class User(UserMixin):
 
     def __init__(self, id, username, email, password, first_name, last_name):
+
+        self.otp_secret = base64.b32encode(os.urandom(10)).decode('utf-8')
         self.id = id
         self.username = username
         self.email = email
@@ -48,16 +52,20 @@ class User(UserMixin):
         self.last_name = last_name
         self.authenticated = False
 
-    def is_active(self):
-        return self.is_active()
+    def get_totp_uri(self):
+        return 'otpauth://totp/MT-2FA:{0}?secret={1}&issuer=MT-2FA'.format(self.username, self.otp_secret)
 
-    def is_anonymouse(self):
+    def verify_totp(self, token):
+        return onetimepass.valid_totp(token, self.otp_secret)
+
+    def is_anonymous(self):
         return False
 
     def is_authenticated(self):
         return self.authenticated
 
     def is_active(self):
+        # TODO: impliment this 
         return True
 
     def get_id(self):
@@ -99,7 +107,7 @@ ADD_TAG_TO_POST = 'insert or ignore into post_tag (post_id, tag_id) values (?, ?
 DELETE_TAG_FROM_POST = 'delete from post_tag where post_tag.post_id = ? and post_tag.tag_id = ?'
 ALL_POSTS_WITH_TAGS = '''
 select
-    author.first_name, post.id, post.title, post.content, post.pub_date, post.published, group_concat(tag.tag, ",") as post_tags
+    author.first_name as author_first_name, author.id as author_id, post.id, post.title, post.content, post.pub_date, post.published, group_concat(tag.tag, ",") as post_tags
     from post
     join author on post.author_id = author.id
     LEFT join post_tag on post.id = post_tag.post_id
@@ -108,7 +116,10 @@ select
 '''
 POST_WITH_TAGS_BY_POST_ID = '''
 select
-    author.first_name, post.id, post.title, post.content, post.pub_date, post.published, group_concat(tag.tag, ",") as post_tags
+
+    author.first_name as author_first_name, author.id as author_id,
+    post.id, post.title, post.content, post.pub_date, post.published, group_concat(tag.tag, ",") as post_tags
+
     from post
     join author on post.author_id = author.id
     LEFT join post_tag on post.id = post_tag.post_id
@@ -161,17 +172,30 @@ def news():
 @app.route('/admin/dashboard')
 @login_required
 def dashboard():
-    posts = get_posts_with_tags()
-    return render_template('admin/dashboard.html', posts=posts)
+    posts_for_logged_in_author = [
+        post for post
+        in get_posts_with_tags()
+        if post['author_id'] == current_user.get_id()
+    ]
+    return render_template('admin/dashboard.html', posts=posts_for_logged_in_author)
 
 @app.route('/admin')
 def admin():
-    return redirect('admin/dashboard')
+    return redirect(url_for('dashboard'))
+
+@app.route('/admin/qrcode', methods=['GET'])
+def qrcode():
+
+
+    return 'qrcode'
 
 @app.route('/admin/login', methods=['GET','POST'])
 def login():
 
     form = LoginForm()
+
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
 
     if form.validate_on_submit():
 
@@ -183,16 +207,19 @@ def login():
             result = cur.fetchone()
 
             if result is None:
-                error = 'Invalid user/password combination'
-                return render_template('admin/login.html', form=form, error=error)
+                flash('Invalid user/password combination', 'error')
+                return render_template('admin/login.html', form=form)
 
             user = load_user(result['id'])
+
+            # TODO: create a new user db table, 
+            cur.execute('select * from user', [user.id])
 
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
             else:
-                error = 'invalid user/password combination'
-                return render_template('admin/login.html', form=form, error=error)
+                flash('Invalid user/password combination', 'error')
+                return render_template('admin/login.html', form=form)
 
             # is_safe_url should check if the url is safe for redirects.
             # See http://flask.pocoo.org/snippets/62/ for an example.
@@ -274,7 +301,7 @@ def new_post():
             cur.execute(ALL_POSTS_WITH_TAGS)
             posts = [post for post in cur.fetchall()]
 
-            return redirect('/admin/dashboard')
+            return redirect(url_for('dashboard'))
 
 @app.route('/admin/post/<int:post_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -295,7 +322,6 @@ def edit_post(post_id):
         tags = set([ tag.lower() for tag 
                  in re.split(r"[\s,]", request.form.get('post-tags', ''))
                  if len(tag) ])
-        print('tags: ', tags)
 
         with sqlite3.connect('db/mt.db') as con:
 
@@ -331,7 +357,7 @@ def edit_post(post_id):
 
             con.commit()
 
-        return redirect('/admin')
+        return redirect(url_for('admin'))
 
 @login_required
 @app.route('/admin/post/<int:post_id>/publish', methods=['POST'])
@@ -342,7 +368,7 @@ def publish_post(post_id):
         cur.execute('update post set published = 1 where id = ?', [post_id])
         con.commit()
 
-    return redirect('/admin')
+    return redirect(url_for('admin'))
 
 @app.errorhandler(404)
 def page_not_found(error):
