@@ -7,12 +7,16 @@ from operator import itemgetter
 import onetimepass
 import re
 
+import pyqrcode
+from io import BytesIO
+
+
 from flask import Flask, flash, get_flashed_messages, render_template, redirect, request, url_for
 from flask_bcrypt import Bcrypt
 from flask_mde import Mde, MdeField
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
-from wtforms.validators import InputRequired, Email, Length
+from wtforms.validators import InputRequired, Email, Length, EqualTo
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 def is_safe_url(target):
@@ -36,14 +40,13 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='Lax'
 )
 
-pw_hash = bcrypt.generate_password_hash("testpass")
 mde = Mde(app)
 
 class User(UserMixin):
 
-    def __init__(self, id, username, password, first_name, last_name):
+    def __init__(self, id, username, password, first_name, last_name, otp_secret):
 
-        self.otp_secret = base64.b32encode(os.urandom(10)).decode('utf-8')
+        self.otp_secret = otp_secret # gets set when user initiates this flow
         self.id = id
         self.username = username
         self.password = password
@@ -65,7 +68,7 @@ class User(UserMixin):
 
     def is_active(self):
         # TODO: impliment this 
-        return True
+        return self.active
 
     def get_id(self):
         return self.id
@@ -81,19 +84,23 @@ def load_user(user_id):
         if user is None:
             return None
 
-        id, username, password, first_name, last_name = itemgetter(
-            'id', 'username', 'password', 'first_name', 'last_name')(dict(user))
+        id, username, password, first_name, last_name, otp_secret = itemgetter(
+            'id', 'username', 'password', 'first_name', 'last_name', 'otp_secret')(dict(user))
 
-        return User(id, username, password, first_name, last_name)
+        return User(id, username, password, first_name, last_name, otp_secret)
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[InputRequired(),Length(min=4, max=15)])
-    password = StringField('Password', validators=[InputRequired(),Length(min=8, max=80)])
+    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=8)])
     remember = BooleanField('Remember me')
+
+class AuthForm(FlaskForm):
+    auth_code = StringField('Code', validators=[InputRequired(),Length(min=6, max=6)])
 
 class RegisterForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(),Length(min=4, max=15)])
-    password = StringField('Password', validators=[InputRequired(),Length(min=8, max=80)])
+    password = PasswordField('Password', validators=[InputRequired(),Length(min=8), EqualTo('confirm_password', message='passwords must match') ])
+    confirm_password = PasswordField('Confirm Password', validators = [InputRequired(), Length(min=8)])
     first_name = StringField('First Name', validators=[InputRequired(),Length(min=1, max=100)])
     last_name = StringField('Last Name', validators=[InputRequired(),Length(min=1, max=100)])
 
@@ -173,7 +180,6 @@ def dashboard():
         in get_posts_with_tags()
         if post['author_id'] == current_user.get_id()
     ]
-    print(posts_for_logged_in_author[0])
     return render_template('admin/dashboard.html', posts=posts_for_logged_in_author)
 
 @app.route('/admin')
@@ -184,11 +190,48 @@ def admin():
 def activate():
     return 'activate'
 
-@app.route('/admin/qrcode', methods=['GET'])
+@app.route('/admin/two_factor_setup', methods=['GET'])
+def two_factor_setup():
+
+    return render_template('admin/two_factor_setup.html'), 200, {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'}
+
+@app.route('/admin/two_factor_auth', methods=['GET', 'POST'])
+def two_factor_auth():
+
+    form = AuthForm()
+
+    if form.validate_on_submit():
+
+        if not user.verify_totp(form.auth_code.data):
+            flash('Invalid username, password or token.')
+            return redirect(url_for('two_factor_auth'))
+
+        with sqlite3.connect('db/mt.db', detect_types=sqlite3.PARSE_DECLTYPES) as con:
+            con.row_factory = sqlite3.Row
+            cur = con.cursor()
+            cur.execute('update user set otp_secret = ?, active = 1 where id = ?', [otp_secret, current_user.get_id()]) 
+            return redirect(url_for('dashboard'))
+
+    return render_template('admin/two_factor_auth.html', form=form)
+
+@app.route('/admin/qrcode')
 def qrcode():
 
+    #TODO: restore security checks of username against session
+    # e.g., https://github.com/miguelgrinberg/two-factor-auth-flask/blob/master/app.py#L128
 
-    return 'qrcode'
+    # render qrcode for FreeTOTP
+    url = pyqrcode.create(current_user.get_totp_uri())
+    stream = BytesIO()
+    url.svg(stream, scale=3)
+    return stream.getvalue(), 200, {
+        'Content-Type': 'image/svg+xml',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'}
 
 @app.route('/admin/login', methods=['GET','POST'])
 def login():
@@ -213,12 +256,19 @@ def login():
 
             user = load_user(result['id'])
 
-            # make sure user has done twofactor
-            # TODO: create a new user db table, 
-            # cur.execute('select * from user', [user.id])
-
             if bcrypt.check_password_hash(user.password, form.password.data):
+
                 login_user(user, remember=form.remember.data)
+                user.otp_secret = base64.b32encode(os.urandom(10)).decode('utf-8')
+
+                if user.otp_secret and user.active:
+                    # user has enabled two factor auth, and needs to enter code
+                    return redirect(url_for('two_factor_auth'))
+                else:
+                    # user hasn't enabled two factor auth
+                    return redirect(url_for('two_factor_setup')) 
+
+
             else:
                 flash('Invalid user/password combination', 'error')
                 return render_template('admin/login.html', form=form)
@@ -245,12 +295,32 @@ def logout():
 @app.route('/admin/register', methods=['GET','POST'])
 def register():
 
-    if request.method == 'GET':
-        form = RegisterForm()
-        return render_template('admin/login.html', form=form)
+    form = RegisterForm()
 
-    elif request.method == 'POST':
-        return render_template('admin/login.html')
+    if form.validate_on_submit(): 
+        # check no user in db exists
+        with sqlite3.connect('db/mt.db', detect_types=sqlite3.PARSE_DECLTYPES) as con:
+
+            con.row_factory = sqlite3.Row
+            cur = con.cursor()
+            cur.execute('select * from user where username = ?', [form.username.data])
+            result = cur.fetchone()
+
+            if result is not None:
+                flash('Username is taken')
+                return render_template('admin/register.html', form=form)
+
+            # create user and author records for new user
+            hashed_password = bcrypt.generate_password_hash(form.password.data)
+            cur.execute('insert into user username = ?, password = ?', [form.username.data, hashed_password])
+            new_user_id = cur.lastrowid
+            cur.execute('insert into author author_id = ?, first_name = ?, last_name = ?', [new_user_id, form.first_name.data, form.last_name.data])
+
+            con.commit()
+
+        return redirect(url_for('login'))
+
+    return render_template('admin/register.html', form=form)
 
 @app.route('/admin/post/new', methods=['GET','POST'])
 @login_required
@@ -260,10 +330,7 @@ def new_post():
     if request.method == 'GET':
 
         # design problem: another place to update when adding/ removing default values
-        post = { 
-            'content': '', 
-            'title': ''
-        }
+        post = { 'content': '', 'title': '' }
 
         return render_template('admin/create-post.html', post=post)
 
@@ -316,9 +383,8 @@ def edit_post(post_id):
 
     if request.method == 'POST':
 
-        author_id = 1 
+        author_id = current_user.get_id()
         pub_date = datetime.datetime.now().strftime('%Y-%m-%d')
-        print(pub_date)
         content = request.form.get('post-content')
         title = request.form.get('post-title')
         published = 0

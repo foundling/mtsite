@@ -21,18 +21,14 @@
     </script>
   </div>
 
-  <form name="login-form" method="POST" action="/admin/login">
+  <form name="two-factor-auth-form" method="POST" action="/admin/login">
 
     {{ form.csrf_token }}
 
-    <div>{{ form.username.label }} {{ form.username(size=20,minlength=4, autocomplete="username") }}</div>
-    <div>{{ form.password.label }} {{ form.password(size=20, minlength=8, autocomplete="new-password") }}</div>
-    <div>{{ form.remember.label }} {{ form.remember }}</div>
+    <div>{{ form.auth_code.label }} {{ form.auth_code(size=6,minlength=4, autocomplete="username") }}</div>
 
-    <input type="submit" value="Login" />
+    <input type="submit" value="Auth" />
 
   </form>
 
 {% endblock %}
-
-

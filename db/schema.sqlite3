@@ -4,7 +4,7 @@ PRAGMA foreign_keys = ON;
 
 create table if not exists user (
   id integer primary key autoincrement,
-  is_active integer enum(0,1) default 0, /* requires 2fa */
+  active integer enum(0,1) default 0, /* requires 2fa */
   username text,
   password text,
   otp_secret text

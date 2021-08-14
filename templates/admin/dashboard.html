@@ -29,7 +29,11 @@
         {% for post in posts %}
           <li>
             <form method="POST" action="/admin/post/{{ post.id }}/publish">
-              {{ post.title }} | by <span class="author-name">{{ post.first_name }}</span> on {{ post.pub_date }}
+
+              <span class="post-title">{{ post.title }}</span> | 
+          by <span class="author-name">{{ post.first_name }}</span> on 
+              <span class="pub-date">{{ post.pub_date }}</span>
+
               {% if post.tags %}| tags: {{ post.tags }} |{% endif %}
 
               {% if post.published %}
