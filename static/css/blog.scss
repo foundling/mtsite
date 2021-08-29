@@ -18,6 +18,18 @@ body * {
 
 }
 
+.blog-post {
+  .post-tags {
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    list-style-type: none;
+    li {
+      padding-right: 5px;
+    }
+  }
+}
+
 header, main {
    padding-left: 40px;
    padding-right: 40px;

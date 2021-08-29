@@ -1,3 +1,7 @@
 add author table
 implement publish/unpublish logic
 pull in scss
+
+sqlalchemy to setup orm and a consistent user object
+use sqlalchemy session to store temp data in auth
+fix auth flow
