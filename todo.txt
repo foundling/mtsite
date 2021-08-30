@@ -5,3 +5,7 @@ pull in scss
 sqlalchemy to setup orm and a consistent user object
 use sqlalchemy session to store temp data in auth
 fix auth flow
+
+Features:
+- posting to social media upon update
+- google analytics

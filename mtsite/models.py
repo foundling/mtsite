@@ -1,25 +1,35 @@
-class User(UserMixin):
+from FlaskLogin import UserMixin
 
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
+db = SQLAlchemy()
 
-    def get_totp_uri(self):
-        return 'otpauth://totp/MT-2FA:{0}?secret={1}&issuer=MT-2FA'.format(self.username, self.otp_secret)
+class User(db.Model, UserMixin):
+    # username
+    # password
+    # firstname
+    # lastname
+    # author alias (default is first name, last name)
+    # active
+    pass
 
-    def verify_totp(self, token):
-        return onetimepass.valid_totp(token, self.otp_secret)
+class Post(db.Model):
+    # title
+    # content
+    pass
 
-    def is_anonymous(self):
-        return False
+class Tag(db.Model):
+    # name
+    pass
 
-    def is_authenticated(self):
-        return self.authenticated
+class PostTag(db.Model):
+    # foreign key post_id refs post(id)
+    # foreign key tag_id refs tag(id)
+    pass
 
-    def is_active(self):
-        return self.active
+class Category(db.Model):
+    # name
+    pass
 
-    def get_id(self):
-        return self.id
-
-
+class PostCategory(db.Model):
+    # foreign key post_id refs post(id)
+    # foreign key category_id refs category(id)
+    pass
