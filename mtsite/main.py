@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, render_template
 
 main = Blueprint('main', __name__)
 
@@ -6,11 +6,12 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    render_template('index.html')
+    return render_template('index.html')
 
 @main.route('/search')
 def search_blog():
-    search_query = request.args.get('query')
+    print(request.args)
+    search_query = request.args
     # search title, tags, content
     # how to order results?
-    return 'paged search page with results from search'
+    return 'search query: {}'.format(str(search_query))
