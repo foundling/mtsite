@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint
 
 admin = Blueprint('admin', __name__)
 
@@ -9,17 +9,17 @@ def dashboard():
 # blank form for creating new post
 @admin.route('/post/createform', methods=['GET'])
 def create_form(post_id):
-    return 'blank form for creating new post'
+    return 'blank form for creating new post:' + post_id 
 
 # fetch a post for editing
 @admin.route('/post/<int:post_id>/editform', methods=['GET'])
 def get_post(post_id):
-    return 'form with post data populated'
+    return 'form with post data populated: ' + post_id
 
 # create new post endpoint. post to here from a form where new post was created
 @admin.route('/post/new', methods=['POST'])
 def create_post():
-    return 'create post ' + str(post_id)
+    return 'create post '
 
 # update post endpoint. put to here from a form where you've edited an existing post
 @admin.route('/post/<int:post_id>', methods=['PUT'])

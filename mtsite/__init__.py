@@ -1,17 +1,12 @@
-from flask import Flask, render_template
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask import Flask
+from mtsite.db import db
 
-db = SQLAlchemy()
-
-def create_app():
+def create_app(env):
 
     app = Flask(__name__)
-
+    db.init_app(app)
     app.config['SECRET_KEY'] = 'SECRETKEY'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/mt.db'
-
-    db.init_app(app)
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint,  url_prefix='/')
@@ -24,5 +19,8 @@ def create_app():
 
     from .admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint,  url_prefix='/admin')
+
+    with app.app_context():
+        db.create_all()
 
     return app

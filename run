@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ -z $VIRTUAL_ENV ]
+then
+    echo 'you are not in a virtual env. activating virtual env now ...'
+    . env/bin/activate
+fi
+
+# bug workaround requires --eager-loading flag
+# https://stackoverflow.com/questions/68710169/flask-cli-shows-typeerror-exceptions-must-derive-from-baseexception
+FLASK_APP=mtsite FLASK_DEBUG=1 flask run --eager-loading
