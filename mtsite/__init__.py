@@ -6,6 +6,7 @@
 import os
 
 from flask import Flask
+from flask_mde import Mde
 
 def create_app(test_config=None, instance_relative_config=True):
 
@@ -14,6 +15,7 @@ def create_app(test_config=None, instance_relative_config=True):
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'mt.db')
     )
+    Mde(app)
 
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
@@ -25,14 +27,17 @@ def create_app(test_config=None, instance_relative_config=True):
     except OSError:
         pass
 
-    @app.route('/hello')
-    def hello():
-        return 'hello, world!'
-
     from . import db
     db.init_app(app)
     
+    from mtsite.blueprints.main import main
+    app.register_blueprint(main.bp, url_prefix='/main')
+
     from mtsite.blueprints.auth import auth
     app.register_blueprint(auth.bp, url_prefix='/auth')
+
+    from mtsite.blueprints.admin import admin
+    app.register_blueprint(admin.bp, url_prefix='/admin')
+
 
     return app

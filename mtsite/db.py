@@ -4,6 +4,8 @@ import click
 from flask import current_app, g
 from flask.cli import with_appcontext
 
+# so we can import querys via db.queries from views.
+from . import queries
 
 def get_db():
     if 'db' not in g:
@@ -39,3 +41,5 @@ def init_db_command():
     """ clear existing data and create new tables."""
     init_db()
     click.echo("Initialized the database.")
+
+

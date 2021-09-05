@@ -3,11 +3,11 @@
   <div class="pane-editor">
 
     <form name="blog-post-form" method="{{method}}" action="{{action}} ">
-      <input for="blog-post-form" name="post-title" value="{{post.title}}"></input>
-      {{ mde.editor(name='post-content', default=post.content) }}
+      <input for="blog-post-form" name="title" value="{{post.title}}"></input>
+      {{ mde.editor(name='content', default=post.content) }}
 
       <label>TAGS: 
-        <input for="blog-post-form" name="post-tags" value="{{ post.post_tags | join(', ') }}" />
+        <input for="blog-post-form" name="tags" value="{{ post.post_tags | join(', ') }}" />
       </label>
       <button for="blog-post-form" type="submit">{{mode}} post</button>
     </form>

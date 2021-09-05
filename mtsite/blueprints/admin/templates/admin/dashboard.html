@@ -1,4 +1,4 @@
-{% extends "admin/layout.html" %}
+{% extends "admin-layout.html" %}
 
 {% block messages %}
   <div class="user-notification">
@@ -23,7 +23,7 @@
 
 {% block content %}
   <a href="/logout">Log Out</a>
-  <a href="/admin/post/new"><button>create new post</button></a>
+  <a href="/admin/post/form/create"><button>create new post</button></a>
   <div class="page-admin">
     <div>
       <ul>
@@ -43,7 +43,7 @@
 
               <button type="submit" name="publish-post" value="unpublish">publish</button>
               {% endif %}
-              <a href="/admin/post/{{post.id}}/edit">edit</a>
+              <a href="/admin/post/form/edit">edit</a>
 
             </form>
           </li>
