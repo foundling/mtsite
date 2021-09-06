@@ -1,7 +1,0 @@
-/
-  main page, top announcements
-
-
-/blog
-/news
-  

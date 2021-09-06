@@ -1,4 +1,4 @@
-{% extends "admin/layout.html" %}
+{% extends "admin-layout.html" %}
 
 {% block content %}
   <div class="user-notification">
@@ -20,15 +20,15 @@
     </script>
   </div>
 
-  <form name="register-form" method="POST" action="/admin/register">
+  <form name="register-form" method="POST" action="/auth/signup">
 
     {{ form.csrf_token }}
 
     <div>{{ form.username.label }} {{ form.username(size=20, minlength=4) }}</div>
-    <div>{{ form.password.label }} {{ form.password(size=20, minlength=8) }}</div>
-    <div>{{ form.confirm_password.label }} {{ form.confirm_password(size=20, minlength=8) }}</div>
     <div>{{ form.first_name.label }} {{ form.first_name }}</div>
     <div>{{ form.last_name.label }} {{ form.last_name }}</div>
+    <div>{{ form.password.label }} {{ form.password(size=20, minlength=8) }}</div>
+    <div>{{ form.confirm_password.label }} {{ form.confirm_password(size=20, minlength=8) }}</div>
 
     <input type="submit" value="Login" />
     <script type="text/javascript">
