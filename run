@@ -8,7 +8,9 @@ fi
 
 # bug workaround requires --eager-loading flag
 # https://stackoverflow.com/questions/68710169/flask-cli-shows-typeerror-exceptions-must-derive-from-baseexception
-export FLASK_APP=mtsite
+export FLASK_APP=mtsite.py
 export FLASK_ENV=development
 export FLASK_DEBUG=1
-flask run --eager-loading
+
+flask db init
+#flask run --eager-loading

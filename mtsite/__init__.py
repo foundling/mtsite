@@ -3,49 +3,33 @@
 # 2. tells python that 'mtsite' should be a package
 # https://flask.palletsprojects.com/en/2.0.x/tutorial/factory/
 
-import os
-
-from flask import Flask, g
+from flask import Flask
 from flask_mde import Mde
+from flask_sqlalchemy import SQLAlchemy
 
+from config import Config
 
-def create_app(test_config=None, instance_relative_config=True):
+db = SQLAlchemy()
+mde = Mde()
+
+def create_app(config_class=Config):
 
     app = Flask(__name__)
-    app.config.from_mapping(
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(os.path.join(app.instance_path, 'mt.db')),
-        SQLALCHEMY_TRACK_MODIFICATIONS  = False,
-        SECRET_KEY = 'dev'
-    )
+    app.config.from_object(config_class)
 
-    Mde(app)
+    mde.init_app(app)
+    db.init_app(app)
 
-    if test_config is None:
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        app.config.from_mapping(test_config)
+    from mtsite.blueprints.main import main
+    app.register_blueprint(main.bp, url_prefix='/')
 
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
+    from mtsite.blueprints.auth import auth
+    app.register_blueprint(auth.bp, url_prefix='/auth')
 
-    # register db commands
-    with app.app_context():
-        from mtsite import db
- 
-        db.init_app(app)
-        g.db = db
-
-        # apply blueprints
-        from mtsite.blueprints.main import main
-        app.register_blueprint(main.bp, url_prefix='/')
-
-        from mtsite.blueprints.auth import auth
-        app.register_blueprint(auth.bp, url_prefix='/auth')
-
-        from mtsite.blueprints.admin import admin
-        app.register_blueprint(admin.bp, url_prefix='/admin')
+    from mtsite.blueprints.admin import admin
+    app.register_blueprint(admin.bp, url_prefix='/admin')
 
 
     return app
+
+from mtsite import models

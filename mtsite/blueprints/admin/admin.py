@@ -1,8 +1,6 @@
 from flask import Blueprint, request, flash
 from flask.templating import render_template
 
-from mtsite.db import get_db
-from mtsite.models import stub_post
 
 bp = Blueprint('admin', __name__, template_folder='templates')
 
@@ -10,6 +8,7 @@ bp = Blueprint('admin', __name__, template_folder='templates')
 def index():
     return render_template('admin/dashboard.html')
 
+'''
 # Forms for post CRUD
 @bp.route('/post/form/create')
 def post_create_form():
@@ -49,3 +48,4 @@ def update_post():
 
     flash('post updated!')
     return render_template('admin/dashboard.html')
+'''

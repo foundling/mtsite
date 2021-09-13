@@ -5,7 +5,7 @@ from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import DataRequired
 
 from mtsite.models import User
-from mtsite.db import get_db
+from mtsite import db
 
 bp = Blueprint('auth', __name__, template_folder='templates')
 
@@ -24,37 +24,44 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember Me')
 
 
-@bp.route('/signup', methods=['GET'])
-def signup_form():
+@bp.route('/register', methods=['GET'])
+def register_form():
     form = SignupForm()
-    return render_template('auth/signup.html', form=form)
+    return render_template('auth/register.html', form=form)
 
-@bp.route('/signup', methods=['POST'])
-def signup_data():
+@bp.route('/register', methods=['POST'])
+def register():
 
     form = SignupForm()
 
     if form.validate_on_submit():
 
-        db = get_db()
         username = form.username.data
         password = form.password.data
 
         first_name = form.first_name.data
         last_name = form.last_name.data
         hashed_pw = generate_password_hash(password, 'sha256')
-        user = User(username=username, password=hashed_pw, first_name=first_name, last_name=last_name, is_active=True)
+        user = User(
+            username=username,
+            password=hashed_pw,
+            first_name=first_name,
+            last_name=last_name,
+            is_active=True
+        )
 
         db.session.add(user)
         db.session.commit()
 
+        flash('You have been successfully registered!')
         return redirect(url_for('auth.login'))
 
     else:
         flash('Invalid Form Input')
 
-    return redirect(url_for('auth.signup'))
+    return redirect(url_for('auth.register'))
 
+'''
 @bp.route('/login', methods=['GET'])
 def login():
     form = LoginForm()
@@ -73,3 +80,4 @@ def validate_login():
     else:
         return redirect(url_for('auth.validate_login'))
 
+'''
