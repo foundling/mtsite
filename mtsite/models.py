@@ -11,8 +11,10 @@ class User(db.Model):
     password_hash = db.Column(db.String(128))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
 
+
     def __repr__(self):
         return '<User {}>'.format(self.username)
+
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,10 +24,3 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)
-
-def stub_post():
-    return {
-        'title': 'New Post',
-        'content': '',
-        'post_tags': []
-    }
