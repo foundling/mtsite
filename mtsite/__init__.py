@@ -7,11 +7,13 @@ from flask import Flask
 from flask_mde import Mde
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager
 
 from config import Config
 
 db = SQLAlchemy()
 mde = Mde()
+login = LoginManager()
 
 def create_app(config_class=Config):
 
@@ -21,6 +23,7 @@ def create_app(config_class=Config):
     mde.init_app(app)
     db.init_app(app)
     Migrate(app, db)
+    login.init_app(app)
 
     from mtsite.blueprints.main import main
     app.register_blueprint(main.bp, url_prefix='/')

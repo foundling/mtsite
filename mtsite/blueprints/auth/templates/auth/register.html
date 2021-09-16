@@ -20,20 +20,39 @@
     </script>
   </div>
 
-  <form name="register-form" method="POST" action="/auth/register">
+  <form name="register-form" method="POST">
 
     {{ form.csrf_token }}
 
-    <div>{{ form.username.label }} {{ form.username(size=20, minlength=4) }}</div>
-    <div>{{ form.first_name.label }} {{ form.first_name }}</div>
-    <div>{{ form.last_name.label }} {{ form.last_name }}</div>
-    <div>{{ form.password.label }} {{ form.password(size=20, minlength=8) }}</div>
-    <div>{{ form.confirm_password.label }} {{ form.confirm_password(size=20, minlength=8) }}</div>
+    <div>
+      {{ form.username.label }} {{ form.username(size=32, minlength=4) }}
+      {% for error in form.username.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+    <div>
+      {{ form.first_name.label }} {{ form.first_name }}
+      {% for error in form.first_name.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+    <div>
+      {{ form.password.label }} {{ form.password(size=32, minlength=8) }}
+      {% for error in form.password.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+    <div>
+      {{ form.password2.label }} {{ form.password2(size=32, minlength=8) }}
+      {% for error in form.password2.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+    <p>{{ form.submit() }}</p>
 
-    <input type="submit" value="Login" />
     <script type="text/javascript">
       const password = document.getElementById("password")
-      const confirm_password = document.getElementById("confirm_password");
+      const confirm_password = document.getElementById("password2");
       function validatePassword() {
         if (password.value != confirm_password.value) {
             confirm_password.setCustomValidity("Passwords Don't Match");
