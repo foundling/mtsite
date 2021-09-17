@@ -12,5 +12,5 @@ export FLASK_APP=mtsite.py
 export FLASK_ENV=development
 export FLASK_DEBUG=1
 
-flask db init
+#flask db init
 #flask run --eager-loading
