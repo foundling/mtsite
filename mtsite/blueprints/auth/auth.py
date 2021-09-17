@@ -1,9 +1,8 @@
-from flask import Blueprint, flash, redirect, render_template, url_for
-from werkzeug.security import check_password_hash, generate_password_hash
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField
-from wtforms.validators import DataRequired
+from io import BytesIO
+
+from flask import abort, Blueprint, flash, redirect, render_template, url_for, session
 from flask_login import current_user, login_user, logout_user
+import pyqrcode
 
 from mtsite.models import User
 from mtsite.forms import RegistrationForm, LoginForm
@@ -30,13 +29,55 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        flash('Registration Successful!')
-        return redirect(url_for('auth.login'))
+        session['username'] = user.username
+        return redirect(url_for('auth.two_factor_setup'))
 
     else:
         flash('Invalid Form Input')
+        print(form.errors)
 
     return redirect(url_for('auth.register'))
+
+@bp.route('qrcode')
+def qrcode():
+
+    if 'username' not in session:
+        abort(404)
+ 
+    user = User.query.filter_by(username=session['username']).first()
+
+    if user is None:
+        abort(404)
+
+    del session['username']
+
+    url = pyqrcode.create(user.get_totp_uri())
+    stream = BytesIO()
+    url.svg(stream, scale=5)
+
+    return stream.getvalue(), 200, {
+        'Content-Type': 'image/svg+xml',
+        'Cache-Control': 'no-cache, no-store, mustrevalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    }
+
+
+@bp.route('/twofactor')
+def two_factor_setup():
+
+    if 'username' not in session:
+        return redirect(url_for('auth.register')) # FIXME: is this right?
+
+    user = User.query.filter_by(username=session['username']).first()
+    if user is None:
+        return redirect(url_for('auth.register'))
+
+    return render_template('auth/two_factor_setup.html'), 200, {
+        'Cache-control': 'no-cache, no-store, must-revalidate',
+        'pragma': 'no-cache',
+        'Expires': '0'
+    }
 
 @bp.route('/login', methods=['GET'])
 def login():
@@ -55,8 +96,9 @@ def validate_login():
 
         user = User.query.filter_by(username=form.username.data).first()
 
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+        if user is None or not user.check_password(form.password.data) or \
+                not user.verify_totp(form.token.data):
+            flash('Invalid username, password or token.')
             return redirect(url_for('auth.login'))
 
         login_user(user)

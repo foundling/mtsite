@@ -27,25 +27,25 @@
     <div>
       {{ form.username.label }} {{ form.username(size=32, minlength=4) }}
       {% for error in form.username.errors %}
-      <span style="color: red;">[{{ error }}]</span>
+      username: <span style="color: red;">[{{ error }}]</span>
       {% endfor %}
     </div>
     <div>
       {{ form.first_name.label }} {{ form.first_name }}
       {% for error in form.first_name.errors %}
-      <span style="color: red;">[{{ error }}]</span>
+      first_name:<span style="color: red;">[{{ error }}]</span>
       {% endfor %}
     </div>
     <div>
       {{ form.password.label }} {{ form.password(size=32, minlength=8) }}
       {% for error in form.password.errors %}
-      <span style="color: red;">[{{ error }}]</span>
+      password: <span style="color: red;">[{{ error }}]</span>
       {% endfor %}
     </div>
     <div>
       {{ form.password2.label }} {{ form.password2(size=32, minlength=8) }}
       {% for error in form.password2.errors %}
-      <span style="color: red;">[{{ error }}]</span>
+      password2: <span style="color: red;">[{{ error }}]</span>
       {% endfor %}
     </div>
     <p>{{ form.submit() }}</p>
