@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import DataRequired
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user
 
 from mtsite.models import User
 from mtsite.forms import RegistrationForm, LoginForm
@@ -63,3 +63,12 @@ def validate_login():
         return redirect(url_for('admin.dashboard'))
 
     return render_template('login')
+
+@bp.route('/logout', methods=['GET'])
+def logout():
+
+    if current_user.is_authenticated:
+        logout_user()
+
+    return redirect(url_for('auth.login'))
+
