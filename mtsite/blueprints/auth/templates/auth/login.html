@@ -27,6 +27,7 @@
 
     <div>{{ form.username.label }} {{ form.username(size=20,minlength=4, autocomplete="username") }}</div>
     <div>{{ form.password.label }} {{ form.password(size=20, minlength=8, autocomplete="new-password") }}</div>
+    <div>{{ form.token.label }} {{ form.token(size=16) }}</div>
     <div>{{ form.remember_me.label }} {{ form.remember_me }}</div>
 
     <input type="submit" value="Login" />
