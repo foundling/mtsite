@@ -1,36 +1,39 @@
-from db import db
+from mtsite import db
+from mtsite import login
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
-class User(db.Model):
-    __tablename__ = 'User'
+from datetime import datetime
+from mtsite import db
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(10), unique=True)
-    password = db.Column(db.String(80))
-    first_name = db.Column(db.String(80))
-    last_name = db.Column(db.String(80))
-    author_alias = db.Column(db.String(10), unique=True)
-    is_active = db.Column(db.Boolean)
+    first_name = db.Column(db.String(64))
+    username = db.Column(db.String(64), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
+
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password): 
+        return check_password_hash(self.password_hash, password)
+
+
+    def __repr__(self):
+        return '<User {}>'.format(self.username)
+
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100))
-    content = db.Column(db.String)
+    body = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-class Tag(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True)
-
-'''
-class PostTag(db.Model):
-    # foreign key post_id refs post(id)
-    # foreign key tag_id refs tag(id)
-'''
-
-class Category(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True)
-
-'''
-class PostCategory(db.Model):
-    # foreign key post_id refs post(id)
-    # foreign key category_id refs category(id)
-'''
+    def __repr__(self):
+        return '<Post {}>'.format(self.body)

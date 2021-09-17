@@ -1,26 +1,40 @@
-from flask import Flask
-from mtsite.db import db
+# Purposes of this file:
+# 1. contains the app factory (which prevents us from having to pass app object around
+# 2. tells python that 'mtsite' should be a package
+# https://flask.palletsprojects.com/en/2.0.x/tutorial/factory/
 
-def create_app(env):
+from flask import Flask
+from flask_mde import Mde
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_login import LoginManager
+
+from config import Config
+
+db = SQLAlchemy()
+mde = Mde()
+login = LoginManager()
+
+def create_app(config_class=Config):
 
     app = Flask(__name__)
+    app.config.from_object(config_class)
+
+    mde.init_app(app)
     db.init_app(app)
-    app.config['SECRET_KEY'] = 'SECRETKEY'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/mt.db'
+    Migrate(app, db)
+    login.init_app(app)
 
-    from .main import main as main_blueprint
-    app.register_blueprint(main_blueprint,  url_prefix='/')
+    from mtsite.blueprints.main import main
+    app.register_blueprint(main.bp, url_prefix='/')
 
-    from .blog import blog as blog_blueprint
-    app.register_blueprint(blog_blueprint,  url_prefix='/blog')
+    from mtsite.blueprints.auth import auth
+    app.register_blueprint(auth.bp, url_prefix='/auth')
 
-    from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/admin')
+    from mtsite.blueprints.admin import admin
+    app.register_blueprint(admin.bp, url_prefix='/admin')
 
-    from .admin import admin as admin_blueprint
-    app.register_blueprint(admin_blueprint,  url_prefix='/admin')
-
-    with app.app_context():
-        db.create_all()
 
     return app
+
+from mtsite import models

@@ -1,0 +1,67 @@
+{% extends "admin-layout.html" %}
+
+{% block content %}
+  <div class="user-notification">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for category, message in messages %}
+         <li class="{{category}}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    <script>
+
+      setTimeout(() => {
+        document.querySelector('.user-notification').toggleClass('.user-notification-hidden');
+      }, 3000);
+
+    </script>
+  </div>
+
+  <form name="register-form" method="POST">
+
+    {{ form.csrf_token }}
+
+    <div>
+      {{ form.username.label }} {{ form.username(size=32, minlength=4) }}
+      {% for error in form.username.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+    <div>
+      {{ form.first_name.label }} {{ form.first_name }}
+      {% for error in form.first_name.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+    <div>
+      {{ form.password.label }} {{ form.password(size=32, minlength=8) }}
+      {% for error in form.password.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+    <div>
+      {{ form.password2.label }} {{ form.password2(size=32, minlength=8) }}
+      {% for error in form.password2.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+    </div>
+    <p>{{ form.submit() }}</p>
+
+    <script type="text/javascript">
+      const password = document.getElementById("password")
+      const confirm_password = document.getElementById("password2");
+      function validatePassword() {
+        if (password.value != confirm_password.value) {
+            confirm_password.setCustomValidity("Passwords Don't Match");
+        } else {
+          confirm_password.setCustomValidity('');
+        }
+      }
+      password.onchange = validatePassword;
+      confirm_password.onkeyup = validatePassword;
+    </script>
+  </form>
+{% endblock %}

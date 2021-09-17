@@ -1,0 +1,54 @@
+{% extends "admin-layout.html" %}
+
+{% block messages %}
+  <div class="user-notification">
+    {% with messages = get_flashed_messages(category_filter=['info']) %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    <script>
+
+      setTimeout(() => {
+        //document.querySelector('.user-notification').toggleClass('.user-notification-hidden');
+      }, 3000);
+
+    </script>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <a href="/auth/logout">Log Out</a>
+  <a href="/admin/post/form/create"><button>create new post</button></a>
+  <div class="page-admin">
+    <div>
+      <ul>
+        {% for post in posts %}
+          <li>
+            <form method="POST" action="/admin/post/{{ post.id }}/publish">
+
+              <span class="post-title">{{ post.title }}</span> | 
+          by <span class="author-name">{{ post.first_name }}</span> on 
+              <span class="pub-date">{{ post.pub_date }}</span>
+
+              {% if post.tags %}| tags: {{ post.tags }} |{% endif %}
+
+              {% if post.published %}
+                <button type="submit" name="publish-post" value="publish">unpublish</button>
+              {% else %}
+
+              <button type="submit" name="publish-post" value="unpublish">publish</button>
+              {% endif %}
+              <a href="/admin/post/form/edit">edit</a>
+
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}
