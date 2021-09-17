@@ -5,7 +5,7 @@ from flask.templating import render_template
 bp = Blueprint('admin', __name__, template_folder='templates')
 
 @bp.route('/dashboard')
-def index():
+def dashboard():
     return render_template('admin/dashboard.html')
 
 '''

@@ -1,5 +1,5 @@
 from mtsite import create_app, db, cli
-from mtsite.models import User, Post, Message, Notification, Task
+from mtsite.models import User, Post
 
 app = create_app()
 cli.register(app)

@@ -6,16 +6,10 @@ from wtforms.validators import DataRequired
 from flask_login import current_user, login_user
 
 from mtsite.models import User
-from mtsite.forms import RegistrationForm
+from mtsite.forms import RegistrationForm, LoginForm
 from mtsite import db
 
 bp = Blueprint('auth', __name__, template_folder='templates')
-
-
-class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()], default='aramsdell')
-    password = PasswordField('Password', validators=[DataRequired()])
-    remember = BooleanField('Remember Me')
 
 
 @bp.route('/register', methods=['GET'])
@@ -61,10 +55,11 @@ def validate_login():
 
         user = User.query.filter_by(username=form.username.data).first()
 
-        if user is None or not user.check_password_hash(form.password.data):
-
+        if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('auth.login'))
+
         login_user(user)
         return redirect(url_for('admin.dashboard'))
+
     return render_template('login')
