@@ -12,3 +12,4 @@ env
 build
 *.txt
 .sass-cache
+db/mt.db
