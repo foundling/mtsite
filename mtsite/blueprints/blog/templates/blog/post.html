@@ -1,0 +1,11 @@
+{% block content %} 
+  <div class="page blog-page">
+    <div class="post">
+      <p>:::{{ post.feature }}:::</p>
+      <h1>{{ post.title }}</h1>
+      <p>by {{ post.author }} on {{ post.published_on }}.</p>
+      <p>{{ post.content }} </p>
+      <p>tags: {% for tag in post.tags %}{{ tag }} {% endfor %}</p>
+    </div>
+  </div>
+{% endblock %}

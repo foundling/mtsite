@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% block head %}
+    {{ super() }}
     <link rel="stylesheet" href="{{ url_for('main.static', filename='css/main.css') }}"></link>
 {% endblock %}
 
@@ -36,4 +37,8 @@
     </section>
   </main>
 
+{% endblock %}
+
+{% block footer %}
+{{ super() }}
 {% endblock %}

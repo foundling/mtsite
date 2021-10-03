@@ -1,7 +1,20 @@
-{% extends "base.html" %}
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"></link>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Machine Tone{% block title %}{% endblock %}</title>
+    {% endblock %}
+    <!-- <script src="https://kit.fontawesome.com/beb61ff654.js" crossorigin="anonymous"></script> -->
+  </head>
 
-{% block content %}{% endblock %}
+  <body>
+    {% block content %}{% endblock %}
+    <!-- TODO: push footer to bottom --> 
+    {% block footer %}
+      <footer>© 2021 Machine Tone. All rights reserved.</footer>
+    {% endblock %}
+  </body>
 
-<footer>
-  <p>&#169; Machine Tone Music, 2021.  All Rights Reserved.</p>
-</footer>
+</html>

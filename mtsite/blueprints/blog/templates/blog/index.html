@@ -1,11 +1,14 @@
 {% extends "layout.html" %}
 
+{% block title %} | Blog{% endblock %}
 {% block head %}
+    {{ super() }}
     <link rel="stylesheet" href="{{ url_for('blog.static', filename='css/blog.css') }}"></link>
 {% endblock %}
 
 {% block content %} 
   <div class="page blog-page">
+
     {% for post in posts %}
       <div class="post">
         <p>:::{{ post.feature }}:::</p>
@@ -15,5 +18,6 @@
         <p>tags: {% for tag in post.tags %}{{ tag }} {% endfor %}</p>
       </div>
     {% endfor %}
+
   </div>
 {% endblock %}
