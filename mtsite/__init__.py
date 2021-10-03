@@ -34,6 +34,8 @@ def create_app(config_class=Config):
     from mtsite.blueprints.admin import admin
     app.register_blueprint(admin.bp, url_prefix='/admin')
 
+    from mtsite.blueprints.blog import blog
+    app.register_blueprint(blog.bp, url_prefix='/blog')
 
     return app
 

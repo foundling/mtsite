@@ -178,4 +178,10 @@ header, main {
 a > button {
   border: 0 !important; }
 
+.page .blog-page {
+  background: red !important; }
+
+p {
+  font-weight: bold; }
+
 /*# sourceMappingURL=blog.css.map */

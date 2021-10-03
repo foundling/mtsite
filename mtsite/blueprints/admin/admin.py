@@ -2,7 +2,7 @@ from flask import Blueprint, request, flash
 from flask.templating import render_template
 
 
-bp = Blueprint('admin', __name__, template_folder='templates')
+bp = Blueprint('admin', __name__, template_folder='templates', static_folder='static')
 
 @bp.route('/dashboard')
 def dashboard():

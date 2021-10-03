@@ -1,10 +1,14 @@
 {% extends "layout.html" %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/main.css') }}"></link>
+{% endblock %}
+
 {% block content %}
 
   <header>
-    <a src="{{ url_for('static', filename='img/mt-logo-short-white-on-black.png') }}" href="/">
-      <img class="mt-logo" src="{{ url_for('static', filename='img/mt-logo-long-white-on-black-cropped.png') }}" />
+    <a src="{{ url_for('main.static', filename='img/mt-logo-short-white-on-black.png') }}" href="/">
+      <img class="mt-logo" src="{{ url_for('main.static', filename='img/mt-logo-long-white-on-black-cropped.png') }}" />
     </a>
   </header>
 
@@ -14,7 +18,7 @@
       <div class="release">
         <div class="visual">
           <a href="https://machinetonemusic.bandcamp.com">
-            <img src="{{ url_for('static', filename='img/cosmic-takes-new-cover.jpg') }}" />
+            <img src="{{ url_for('main.static', filename='img/cosmic-takes-new-cover.jpg') }}" />
           </a>
         </div>
         <div class="text">

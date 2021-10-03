@@ -8,7 +8,7 @@ from mtsite.models import User
 from mtsite.forms import RegistrationForm, LoginForm
 from mtsite import db
 
-bp = Blueprint('auth', __name__, template_folder='templates')
+bp = Blueprint('auth', __name__, template_folder='templates', static_folder='static')
 
 
 @bp.route('/register', methods=['GET'])
