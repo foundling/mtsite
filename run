@@ -13,4 +13,4 @@ export FLASK_ENV=development
 export FLASK_DEBUG=1
 
 #flask db init
-#flask run --eager-loading
+flask run --eager-loading
