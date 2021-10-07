@@ -8,6 +8,7 @@ from flask_mde import Mde
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from slugify import slugify
 
 from config import Config
 
@@ -36,6 +37,10 @@ def create_app(config_class=Config):
 
     from mtsite.blueprints.blog import blog
     app.register_blueprint(blog.bp, url_prefix='/blog')
+
+    @app.template_filter('slug')
+    def slug(s):
+        return slugify(s)
 
     return app
 
